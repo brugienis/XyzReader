@@ -22,4 +22,4 @@
             android:contentDescription="@string/up"
             android:src="@drawable/ic_arrow_back" />
     </FrameLayout>
-</FrameLayout><!-- From: file:/Users/business/Downloads/xyzreader/XYZReader/src/main/res/layout/activity_article_detail.xml -->
+</FrameLayout><!-- From: file:/Users/business/AndroidStudioProjects/XYZReader/XYZReader/src/main/res/layout/activity_article_detail.xml -->
