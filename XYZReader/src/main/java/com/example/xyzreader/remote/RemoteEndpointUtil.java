@@ -24,6 +24,7 @@ public class RemoteEndpointUtil {
         try {
             itemsJson = fetchPlainText(Config.BASE_URL);
         } catch (IOException e) {
+            // FIXME: 19/04/2016 handle exception
             Log.e(TAG, "Error fetching items JSON", e);
             return null;
         }
@@ -37,6 +38,7 @@ public class RemoteEndpointUtil {
             }
             return (JSONArray) val;
         } catch (JSONException e) {
+            // FIXME: 19/04/2016 handle exception
             Log.e(TAG, "Error parsing items JSON", e);
         }
 

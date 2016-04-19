@@ -77,6 +77,7 @@ public class UpdaterService extends IntentService {
 
             getContentResolver().applyBatch(ItemsContract.CONTENT_AUTHORITY, cpo);
 
+            // FIXME: 19/04/2016 handle exception
         } catch (JSONException | RemoteException | OperationApplicationException e) {
             Log.e(TAG, "Error updating content.", e);
         }
