@@ -9,6 +9,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -42,11 +43,16 @@ public class ArticleListActivity extends AppCompatActivity implements
 //        setContentView(R.layout.activity_article_list);
         setContentView(R.layout.activity_article_list_with_coordinatorlayout);
 //        setContentView(R.layout.activity_article_list_1);
+//        setContentView(R.layout.activity_article_list_exp);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        final ActionBar ab = getSupportActionBar();
+//        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
+        ab.setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final View toolbarContainerView = findViewById(R.id.toolbar_container);
 
