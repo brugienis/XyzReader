@@ -21,7 +21,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class UpdaterService extends IntentService {
-    private static final String TAG = "UpdaterService";
+
+    private static final String TAG = UpdaterService.class.getSimpleName();
 
     public static final String BROADCAST_ACTION_STATE_CHANGE
             = "com.example.xyzreader.intent.action.STATE_CHANGE";
@@ -39,12 +40,14 @@ public class UpdaterService extends IntentService {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
         if (ni == null || !ni.isConnected()) {
+            // FIXME: 4/05/2016 - show snackbar. Use EventBus to send event.
             Log.w(TAG, "Not online, not refreshing.");
             return;
         }
 
         sendStickyBroadcast(
                 new Intent(BROADCAST_ACTION_STATE_CHANGE).putExtra(EXTRA_REFRESHING, true));
+        Log.v(TAG, "onHandleIntent - sending refresh true");
 
         // Don't even inspect the intent, we only do one thing, and that's fetch content.
         ArrayList<ContentProviderOperation> cpo = new ArrayList<ContentProviderOperation>();
@@ -84,5 +87,6 @@ public class UpdaterService extends IntentService {
 
         sendStickyBroadcast(
                 new Intent(BROADCAST_ACTION_STATE_CHANGE).putExtra(EXTRA_REFRESHING, false));
+        Log.v(TAG, "onHandleIntent - sending refresh false");
     }
 }

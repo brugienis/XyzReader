@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -36,14 +38,17 @@ public class ArticleListActivity extends AppCompatActivity implements
     private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
+    private View mCoordinatorlayout;
+
+    private static final String TAG = ArticleListActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_article_list);
         setContentView(R.layout.activity_article_list_with_coordinatorlayout);
-//        setContentView(R.layout.activity_article_list_1);
-//        setContentView(R.layout.activity_article_list_exp);
+
+        mCoordinatorlayout = findViewById(R.id.articleListActivity);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -51,12 +56,20 @@ public class ArticleListActivity extends AppCompatActivity implements
         setSupportActionBar(mToolbar);
         final ActionBar ab = getSupportActionBar();
 //        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        ab.setDisplayHomeAsUpEnabled(true);
+        // FIXME: 4/05/2016 - remove below before submitting this project
+//        ab.setDisplayHomeAsUpEnabled(true);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final View toolbarContainerView = findViewById(R.id.toolbar_container);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                                                     @Override
+                                                     public void onRefresh() {
+                                                         refresh();
+                                                     }
+                                                 }
+        );
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         getLoaderManager().initLoader(0, null, this);
@@ -66,6 +79,9 @@ public class ArticleListActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Start new search.
+     */
     private void refresh() {
         startService(new Intent(this, UpdaterService.class));
     }
@@ -97,6 +113,7 @@ public class ArticleListActivity extends AppCompatActivity implements
 
     private void updateRefreshingUI() {
         mSwipeRefreshLayout.setRefreshing(mIsRefreshing);
+        showSnackBar(R.string.snack_test);
     }
 
     @Override
@@ -181,5 +198,13 @@ public class ArticleListActivity extends AppCompatActivity implements
             titleView = (TextView) view.findViewById(R.id.article_title);
             subtitleView = (TextView) view.findViewById(R.id.article_subtitle);
         }
+    }
+
+    public void showSnackBar(int msg) {
+        Snackbar
+                .make(mCoordinatorlayout, msg, Snackbar.LENGTH_INDEFINITE)
+                .setAction("XX", null)
+                .setActionTextColor(Color.RED)
+                .show(); // Don’t forget to show!
     }
 }
