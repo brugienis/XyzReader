@@ -10,5 +10,6 @@
     <string name="up">Up</string>
 
     <string name="snack_test">Server starting</string>
+    <string name="broadcast_no_network_connection">No network connection.</string>
 
 </resources>

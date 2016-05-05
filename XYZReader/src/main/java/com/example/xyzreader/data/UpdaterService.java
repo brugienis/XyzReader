@@ -12,6 +12,7 @@ import android.os.RemoteException;
 import android.text.format.Time;
 import android.util.Log;
 
+import com.example.xyzreader.R;
 import com.example.xyzreader.remote.RemoteEndpointUtil;
 
 import org.json.JSONArray;
@@ -28,6 +29,8 @@ public class UpdaterService extends IntentService {
             = "com.example.xyzreader.intent.action.STATE_CHANGE";
     public static final String EXTRA_REFRESHING
             = "com.example.xyzreader.intent.extra.REFRESHING";
+    public static final String EXTRA_NETWORK_PROBLEM
+            = "com.example.xyzreader.intent.extra.NETWORK_PROBLEM";
 
     public UpdaterService() {
         super(TAG);
@@ -35,14 +38,21 @@ public class UpdaterService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.v(TAG, "onHandleIntent - start");
         Time time = new Time();
 
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
+        ni = null;
         if (ni == null || !ni.isConnected()) {
             // FIXME: 4/05/2016 - show snackbar. Use EventBus to send event.
-            Log.w(TAG, "Not online, not refreshing.");
+            int i = R.string.broadcast_no_network_connection;
+            Log.v(TAG, "Not online, not refreshing." + i);
+            sendStickyBroadcast(
+                    new Intent(BROADCAST_ACTION_STATE_CHANGE).putExtra(EXTRA_NETWORK_PROBLEM, R.string.broadcast_no_network_connection));
             return;
+        } else {
+            Log.v(TAG, "ni not null: " + ni);
         }
 
         sendStickyBroadcast(

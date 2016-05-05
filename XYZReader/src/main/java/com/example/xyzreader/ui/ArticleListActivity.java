@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -104,8 +105,18 @@ public class ArticleListActivity extends AppCompatActivity implements
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.v(TAG, "onReceive - action:" + intent.getAction());
             if (UpdaterService.BROADCAST_ACTION_STATE_CHANGE.equals(intent.getAction())) {
-                mIsRefreshing = intent.getBooleanExtra(UpdaterService.EXTRA_REFRESHING, false);
+//                String networkProblemMessage = intent.getStringExtra(UpdaterService.EXTRA_NETWORK_PROBLEM);
+                if (intent.hasExtra(UpdaterService.EXTRA_NETWORK_PROBLEM)) {
+                    mIsRefreshing = false;
+                    int networkProblemMessageInt = intent.getIntExtra(UpdaterService.EXTRA_NETWORK_PROBLEM, -1);
+                    Log.v(TAG, "networkProblemMessageInt: " + networkProblemMessageInt);
+                    showSnackBar(networkProblemMessageInt);
+                } else {
+                    mIsRefreshing = intent.getBooleanExtra(UpdaterService.EXTRA_REFRESHING, false);
+                    Log.v(TAG, "onReceive - mIsRefreshing updated: " + mIsRefreshing);
+                }
                 updateRefreshingUI();
             }
         }
@@ -113,7 +124,7 @@ public class ArticleListActivity extends AppCompatActivity implements
 
     private void updateRefreshingUI() {
         mSwipeRefreshLayout.setRefreshing(mIsRefreshing);
-        showSnackBar(R.string.snack_test);
+//        showSnackBar(R.string.snack_test);
     }
 
     @Override
