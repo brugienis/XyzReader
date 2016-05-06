@@ -10,6 +10,8 @@
     <string name="up">Up</string>
 
     <string name="snack_test">Server starting</string>
-    <string name="broadcast_no_network_connection">No network connection.</string>
+    <string name="broadcast_no_network_connection">No network connection - try again later.</string>
+    <string name="broadcast_error_updating_content">Error updating content - try again later.</string>
+    <string name="broadcast_error_received_invalid_data">Received invalid data - try again later.</string>
 
 </resources>

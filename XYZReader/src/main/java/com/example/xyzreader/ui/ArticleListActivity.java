@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -53,13 +52,7 @@ public class ArticleListActivity extends AppCompatActivity implements
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
-        final ActionBar ab = getSupportActionBar();
-//        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        // FIXME: 4/05/2016 - remove below before submitting this project
-//        ab.setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final View toolbarContainerView = findViewById(R.id.toolbar_container);
 
@@ -84,7 +77,12 @@ public class ArticleListActivity extends AppCompatActivity implements
      * Start new search.
      */
     private void refresh() {
-        startService(new Intent(this, UpdaterService.class));
+        Log.v(TAG, "refresh - called - mIsRefreshing: " + mIsRefreshing);
+        if (!mIsRefreshing) {
+            startService(new Intent(this, UpdaterService.class));
+        } else {
+            Log.v(TAG, "refresh - refreshing skipped - mIsRefreshing: " + mIsRefreshing);
+        }
     }
 
     @Override

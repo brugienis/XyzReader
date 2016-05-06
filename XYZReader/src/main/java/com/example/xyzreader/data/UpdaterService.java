@@ -43,13 +43,12 @@ public class UpdaterService extends IntentService {
 
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
-        ni = null;
         if (ni == null || !ni.isConnected()) {
-            // FIXME: 4/05/2016 - show snackbar. Use EventBus to send event.
-            int i = R.string.broadcast_no_network_connection;
-            Log.v(TAG, "Not online, not refreshing." + i);
+            Log.v(TAG, "ni is null: " + ni);
             sendStickyBroadcast(
-                    new Intent(BROADCAST_ACTION_STATE_CHANGE).putExtra(EXTRA_NETWORK_PROBLEM, R.string.broadcast_no_network_connection));
+                    new Intent(BROADCAST_ACTION_STATE_CHANGE).
+                            putExtra(EXTRA_NETWORK_PROBLEM,
+                                    R.string.broadcast_no_network_connection));
             return;
         } else {
             Log.v(TAG, "ni not null: " + ni);
@@ -90,9 +89,13 @@ public class UpdaterService extends IntentService {
 
             getContentResolver().applyBatch(ItemsContract.CONTENT_AUTHORITY, cpo);
 
-            // FIXME: 19/04/2016 handle exception
         } catch (JSONException | RemoteException | OperationApplicationException e) {
-            Log.e(TAG, "Error updating content.", e);
+            sendStickyBroadcast(
+                    new Intent(BROADCAST_ACTION_STATE_CHANGE)
+                            .putExtra(EXTRA_NETWORK_PROBLEM,
+                                    e instanceof JSONException ?
+                                            R.string.broadcast_error_received_invalid_data :
+                                            R.string.broadcast_error_updating_content));
         }
 
         sendStickyBroadcast(

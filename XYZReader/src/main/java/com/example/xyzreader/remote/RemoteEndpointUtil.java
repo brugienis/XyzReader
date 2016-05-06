@@ -1,5 +1,7 @@
 package com.example.xyzreader.remote;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -19,13 +21,15 @@ public class RemoteEndpointUtil {
     private RemoteEndpointUtil() {
     }
 
+    @Nullable
     public static JSONArray fetchJsonArray() {
-        String itemsJson = null;
+        String itemsJson;
         try {
-            itemsJson = fetchPlainText(Config.BASE_URL);
+//            itemsJson = fetchPlainText(Config.BASE_URL);
+            itemsJson = fetchPlainText(Config.getBaseUrl());
         } catch (IOException e) {
             // FIXME: 19/04/2016 handle exception
-            Log.e(TAG, "Error fetching items JSON", e);
+//            Log.e(TAG, "Error fetching items JSON", e);
             return null;
         }
 
@@ -45,6 +49,7 @@ public class RemoteEndpointUtil {
         return null;
     }
 
+    @NonNull
     static String fetchPlainText(URL url) throws IOException {
         OkHttpClient client = new OkHttpClient();
 
