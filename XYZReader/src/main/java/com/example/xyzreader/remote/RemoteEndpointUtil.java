@@ -2,7 +2,6 @@ package com.example.xyzreader.remote;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,31 +21,17 @@ public class RemoteEndpointUtil {
     }
 
     @Nullable
-    public static JSONArray fetchJsonArray() {
+    public static JSONArray fetchJsonArray() throws IOException, JSONException {
         String itemsJson;
-        try {
-//            itemsJson = fetchPlainText(Config.BASE_URL);
-            itemsJson = fetchPlainText(Config.getBaseUrl());
-        } catch (IOException e) {
-            // FIXME: 19/04/2016 handle exception
-//            Log.e(TAG, "Error fetching items JSON", e);
-            return null;
-        }
+        itemsJson = fetchPlainText(Config.getBaseUrl());
 
         // Parse JSON
-        try {
-            JSONTokener tokener = new JSONTokener(itemsJson);
-            Object val = tokener.nextValue();
-            if (!(val instanceof JSONArray)) {
-                throw new JSONException("Expected JSONArray");
-            }
-            return (JSONArray) val;
-        } catch (JSONException e) {
-            // FIXME: 19/04/2016 handle exception
-            Log.e(TAG, "Error parsing items JSON", e);
+        JSONTokener tokener = new JSONTokener(itemsJson);
+        Object val = tokener.nextValue();
+        if (!(val instanceof JSONArray)) {
+            throw new JSONException("Expected JSONArray");
         }
-
-        return null;
+        return (JSONArray) val;
     }
 
     @NonNull

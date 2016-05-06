@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class UpdaterService extends IntentService {
@@ -89,11 +90,11 @@ public class UpdaterService extends IntentService {
 
             getContentResolver().applyBatch(ItemsContract.CONTENT_AUTHORITY, cpo);
 
-        } catch (JSONException | RemoteException | OperationApplicationException e) {
+        } catch (IOException | JSONException | RemoteException | OperationApplicationException e) {
             sendStickyBroadcast(
                     new Intent(BROADCAST_ACTION_STATE_CHANGE)
                             .putExtra(EXTRA_NETWORK_PROBLEM,
-                                    e instanceof JSONException ?
+                                    e instanceof IOException | e instanceof JSONException ?
                                             R.string.broadcast_error_received_invalid_data :
                                             R.string.broadcast_error_updating_content));
         }
