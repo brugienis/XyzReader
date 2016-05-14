@@ -11,6 +11,7 @@ import com.android.volley.toolbox.Volley;
 public class ImageLoaderHelper {
     private static ImageLoaderHelper sInstance;
 
+    // FIXME: 12/05/2016 - it looks like a Singleton,but I think it is not very reliable - try to use Picassa or Glider.
     public static ImageLoaderHelper getInstance(Context context) {
         if (sInstance == null) {
             sInstance = new ImageLoaderHelper(context.getApplicationContext());

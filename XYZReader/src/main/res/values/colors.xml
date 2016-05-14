@@ -25,4 +25,5 @@
 
     <color name="text_primary">#232323</color>
     <color name="text_secondary">#333333</color>
+    <color name="text_article_byline">#8fff</color>
 </resources>
