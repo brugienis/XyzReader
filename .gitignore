@@ -1,10 +1,12 @@
 *.iml
 .gradle
-/local.properties
-.idea/workspace.xml
+/local.
+.idea
+./idea/workspace.xml
 /.idea/libraries
 .DS_Store
 /build
 /XYZReader/.gradle
 /XYZReader/build
+.XYZReader/XYZReader-XYZReader.iml
 /captures
