@@ -48,6 +48,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     private RecyclerView mRecyclerView;
     private View mCoordinatorlayout;
     private boolean mIsDetailsActivityStarted;
+    private int mCurrentPosition;
     public static String[] ALBUM_NAMES;
 
     static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
@@ -166,10 +167,10 @@ public class ArticleListActivity extends AppCompatActivity implements
         super.onActivityReenter(requestCode, data);
         mTmpReenterState = new Bundle(data.getExtras());
         // FIXME: 25/05/2016 - how to get the position?
-        int currentPosition = 0;
+        int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
         long startId = mTmpReenterState.getLong(EXTRA_STARTING_ALBUM_POSITION);
         long selectedId = mTmpReenterState.getLong(EXTRA_CURRENT_ALBUM_POSITION);
-        Log.v(TAG, "onActivityReenter - startId/selectedId : " + startId + "/" + selectedId);
+        Log.v(TAG, "onActivityReenter - currentPosition/startId/selectedId : " + currentPosition + "/" + startId + "/" + selectedId);
         if (startId != selectedId) {
             mRecyclerView.scrollToPosition(currentPosition);
         }
@@ -274,6 +275,7 @@ public class ArticleListActivity extends AppCompatActivity implements
                             ActivityCompat.startActivity(ArticleListActivity.this, new Intent(Intent.ACTION_VIEW, ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))),
 //                                    ActivityOptions.makeSceneTransitionAnimation(ArticleListActivity.this,
                                     options.toBundle());
+                            mCurrentPosition = vh.thisViewHolderPosition;
 //                                    vh.titleView, vh.titleView.getTransitionName()).toBundle());
                         }
                     } else {
@@ -288,6 +290,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             mCursor.moveToPosition(position);
+            holder.thisViewHolderPosition = position;
             holder.titleView.setText(mCursor.getString(ArticleLoader.Query.TITLE));
             ALBUM_NAMES[position] = mCursor.getString(ArticleLoader.Query.TITLE);
             holder.subtitleView.setText(
@@ -316,6 +319,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         public DynamicHeightNetworkImageView thumbnailView;
         public TextView titleView;
         public TextView subtitleView;
+        public int thisViewHolderPosition;
 
         public ViewHolder(View view) {
             super(view);

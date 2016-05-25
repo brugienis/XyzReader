@@ -235,7 +235,7 @@ public class ArticleDetailActivity extends AppCompatActivity
         public Fragment getItem(int position) {
 //            Log.v(TAG, "getItem - position: " + position);
             mCursor.moveToPosition(position);
-            return ArticleDetailFragment.newInstance(mCursor.getLong(ArticleLoader.Query._ID), mSelectedItemId);
+            return ArticleDetailFragment.newInstance(position, mCursor.getLong(ArticleLoader.Query._ID), mSelectedItemId);
         }
 
         @Override
@@ -244,14 +244,16 @@ public class ArticleDetailActivity extends AppCompatActivity
         }
     }
 
-    static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
+    public static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
     static final String EXTRA_CURRENT_ALBUM_POSITION = "extra_current_item_position";
+    static final String EXTRA_THIS_CURRENT_POSITION = "extra_this_current_position";
 
     @Override
     public void finishAfterTransition() {
         mIsReturning = true;
         Log.v(TAG, "finishAfterTransition - mIsReturning: " + mIsReturning);
         Intent data = new Intent();
+        data.putExtra(EXTRA_THIS_CURRENT_POSITION, mCurrentDetailsFragment.getThisFragmentPosition());
         data.putExtra(EXTRA_STARTING_ALBUM_POSITION, mStartId); //mStartId != mSelectedItemId
         data.putExtra(EXTRA_CURRENT_ALBUM_POSITION, mSelectedItemId);
         setResult(RESULT_OK, data);

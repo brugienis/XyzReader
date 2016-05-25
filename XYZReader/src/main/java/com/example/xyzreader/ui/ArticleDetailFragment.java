@@ -45,9 +45,12 @@ public class ArticleDetailFragment extends Fragment implements
 
     public static final String ARG_ITEM_ID = "item_id";
     public static final String ARG_START_ITEM_ID = "start_item_id";
+    public static final String ARG_THIS_FRAGMENT_POSITION = "this_fragment_position";
     private static final float PARALLAX_FACTOR = 1.25f;
 
     private Cursor mCursor;
+
+    private int mThisFragmentPosition;
     private long mItemId;
     private long mStartItemId;
     private View mRootView;
@@ -70,9 +73,10 @@ public class ArticleDetailFragment extends Fragment implements
     public ArticleDetailFragment() {
     }
 
-    public static ArticleDetailFragment newInstance(long itemId, long startItemId) {
+    public static ArticleDetailFragment newInstance(int position, long itemId, long startItemId) {
 //        Log.v(TAG, "newInstance - itemId/startItemId: " + itemId + "/" + startItemId);
         Bundle arguments = new Bundle();
+        arguments.putInt(ARG_THIS_FRAGMENT_POSITION, position);
         arguments.putLong(ARG_ITEM_ID, itemId);
         arguments.putLong(ARG_START_ITEM_ID, startItemId);
         ArticleDetailFragment fragment = new ArticleDetailFragment();
@@ -85,6 +89,7 @@ public class ArticleDetailFragment extends Fragment implements
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
+            mThisFragmentPosition = getArguments().getInt(ARG_THIS_FRAGMENT_POSITION);
             mItemId = getArguments().getLong(ARG_ITEM_ID);
             mStartItemId = getArguments().getLong(ARG_START_ITEM_ID);
         }
@@ -337,5 +342,9 @@ public class ArticleDetailFragment extends Fragment implements
         Rect containerBounds = new Rect();
         container.getHitRect(containerBounds);
         return view.getLocalVisibleRect(containerBounds);
+    }
+
+    public int getThisFragmentPosition() {
+        return mThisFragmentPosition;
     }
 }
