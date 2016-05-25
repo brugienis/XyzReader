@@ -71,7 +71,7 @@ public class ArticleDetailFragment extends Fragment implements
     }
 
     public static ArticleDetailFragment newInstance(long itemId, long startItemId) {
-        Log.v(TAG, "newInstance - itemId/startItemId: " + itemId + "/" + startItemId);
+//        Log.v(TAG, "newInstance - itemId/startItemId: " + itemId + "/" + startItemId);
         Bundle arguments = new Bundle();
         arguments.putLong(ARG_ITEM_ID, itemId);
         arguments.putLong(ARG_START_ITEM_ID, startItemId);
@@ -93,7 +93,7 @@ public class ArticleDetailFragment extends Fragment implements
         mStatusBarFullOpacityBottom = getResources().getDimensionPixelSize(
                 R.dimen.detail_card_top_margin);
         setHasOptionsMenu(true);
-        Log.v(TAG, "onCreate - itemId/startItemId: " + mItemId + "/" + mStartItemId);
+//        Log.v(TAG, "onCreate - itemId/startItemId: " + mItemId + "/" + mStartItemId);
     }
 
     public ArticleDetailActivity getActivityCast() {
@@ -114,7 +114,7 @@ public class ArticleDetailFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        Log.v(TAG, "onCreateView started");
+//        Log.v(TAG, "onCreateView started");
 
         mRootView = inflater.inflate(R.layout.fragment_article_detail_with_coordinatedlayout, container, false);
 

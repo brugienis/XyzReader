@@ -54,16 +54,12 @@ public class ArticleDetailActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG,"onCreate - start Lollipop");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            Log.v(TAG,"onCreate - before postponeEnterTransition");
             postponeEnterTransition();
-            Log.v(TAG,"onCreate - before setEnterSharedElementCallback");
             setEnterSharedElementCallback(mCallback);
-            Log.v(TAG,"onCreate - after setEnterSharedElementCallback");
         }
         setContentView(R.layout.activity_article_detail);
 
@@ -220,13 +216,13 @@ public class ArticleDetailActivity extends AppCompatActivity
     private class MyPagerAdapter extends FragmentStatePagerAdapter {
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
-            Log.v(TAG, "MyPagerAdapter - constructor");
+//            Log.v(TAG, "MyPagerAdapter - constructor");
         }
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             super.setPrimaryItem(container, position, object);
-            Log.v(TAG, "setPrimaryItem - position: " + position);
+//            Log.v(TAG, "setPrimaryItem - position: " + position);
             ArticleDetailFragment fragment = (ArticleDetailFragment) object;
             mCurrentDetailsFragment = fragment;
             if (fragment != null) {
@@ -237,7 +233,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 
         @Override
         public Fragment getItem(int position) {
-            Log.v(TAG, "getItem - position: " + position);
+//            Log.v(TAG, "getItem - position: " + position);
             mCursor.moveToPosition(position);
             return ArticleDetailFragment.newInstance(mCursor.getLong(ArticleLoader.Query._ID), mSelectedItemId);
         }

@@ -261,10 +261,10 @@ public class ArticleListActivity extends AppCompatActivity implements
 //                        intent.putExtra(EXTRA_STARTING_ALBUM_POSITION, getItemId(vh.getAdapterPosition()));
 
 //                        Log.v(TAG, "onCreateView - mIsDetailsActivityStarted/transitionName: " + mIsDetailsActivityStarted + "/" + vh.thumbnailView.getTransitionName());
-                        Log.v(TAG, "onCreateView - mIsDetailsActivityStarted/transitionName: " + mIsDetailsActivityStarted + "/" + vh.titleView.getTransitionName());
+                        Log.v(TAG, "onCreateViewHolder - mIsDetailsActivityStarted/transitionName: " + mIsDetailsActivityStarted + "/" + vh.titleView.getTransitionName());
                         if (!mIsDetailsActivityStarted) {
                             mIsDetailsActivityStarted = true;
-                            Log.v(TAG, "onCreateView - starting activity with ActivityOptions.makeSceneTransitionAnimation");
+                            Log.v(TAG, "onCreateViewHolder - starting activity with ActivityOptions.makeSceneTransitionAnimation");
 //                            startActivity(intent,ActivityOptions.makeSceneTransitionAnimation(ArticleListActivity.this,
 //                                    vh.thumbnailView, vh.thumbnailView.getTransitionName()).toBundle());
                             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(ArticleListActivity.this, vh.thumbnailView, vh.thumbnailView.getTransitionName());

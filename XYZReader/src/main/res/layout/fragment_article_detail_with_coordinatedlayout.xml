@@ -12,6 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- added the android:transitionGroup="true" below to prevent the ArticleDetail or ArticleDetailFragment to crash. The log at the time of crash starts with thhe worning
+            com.example.xyzreader W/OpenGLRenderer: Layer exceeds max. dimensions supported by the GPU (768x4286, max=4096x4096) followed by
+            JNI DETECTED ERROR IN APPLICATION: JNI CallVoidMethodV called with pending exception 'java.lang.IllegalStateException' thrown in void android.os.MessageQueue.nativePollOnce(long, int):-2
+
+            It happened in the ArticleDetailFragment.startPostponedEnterTransition(), after the addOnPreDrawListener was added in the image selected in the ArticelListActivity.
+
+            I just followed the advise in http://stackoverflow.com/questions/26664922/crash-material-design-android-5-0/27906489
+            -->
         <com.example.xyzreader.ui.ObservableScrollView
             android:id="@+id/scrollview"
             android:layout_width="match_parent"
