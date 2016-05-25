@@ -165,9 +165,12 @@ public class ArticleListActivity extends AppCompatActivity implements
     public void onActivityReenter(int requestCode, Intent data) {
         super.onActivityReenter(requestCode, data);
         mTmpReenterState = new Bundle(data.getExtras());
-        int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
-        int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
-        if (startingPosition != currentPosition) {
+        // FIXME: 25/05/2016 - how to get the position?
+        int currentPosition = 0;
+        long startId = mTmpReenterState.getLong(EXTRA_STARTING_ALBUM_POSITION);
+        long selectedId = mTmpReenterState.getLong(EXTRA_CURRENT_ALBUM_POSITION);
+        Log.v(TAG, "onActivityReenter - startId/selectedId : " + startId + "/" + selectedId);
+        if (startId != selectedId) {
             mRecyclerView.scrollToPosition(currentPosition);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

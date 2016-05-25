@@ -35,7 +35,6 @@ public class ArticleDetailActivity extends AppCompatActivity
 
     private Cursor mCursor;
     private long mStartId;
-
     private long mSelectedItemId;
     private int mSelectedItemUpButtonFloor = Integer.MAX_VALUE;
     private int mTopInset;
@@ -97,7 +96,8 @@ public class ArticleDetailActivity extends AppCompatActivity
         mUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onSupportNavigateUp();
+//                onSupportNavigateUp();
+                finishAfterTransition();
             }
         });
 
@@ -246,6 +246,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 
     static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
     static final String EXTRA_CURRENT_ALBUM_POSITION = "extra_current_item_position";
+
     @Override
     public void finishAfterTransition() {
         mIsReturning = true;
