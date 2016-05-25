@@ -15,7 +15,8 @@
         <com.example.xyzreader.ui.ObservableScrollView
             android:id="@+id/scrollview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:transitionGroup="true">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -33,6 +34,7 @@
                         android:layout_height="match_parent"
                         android:fitsSystemWindows="true"
                         android:scaleType="centerCrop"
+                        android:transitionName="@string/transition_name_photo"
                         />
 
                     <View
@@ -75,7 +77,8 @@
                             android:textColor="#fff"
                             android:textStyle="bold"
                             android:textSize="@dimen/detail_title_text_size"
-                            android:lineSpacingMultiplier="0.9" />
+                            android:lineSpacingMultiplier="0.9"
+                            android:transitionName="@string/transition_name_title"  />
 
                         <TextView
                             android:id="@+id/article_byline"

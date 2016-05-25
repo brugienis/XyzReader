@@ -22,14 +22,16 @@
 
 package com.example.xyzreader.data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
+// FIXME: 25/05/2016 - do not insert a row if it already exists
 
 /**
  * Helper for building selection clauses for {@link SQLiteDatabase}. Each
