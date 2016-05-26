@@ -49,7 +49,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     private View mCoordinatorlayout;
     private boolean mIsDetailsActivityStarted;
     private int mOriginalCurrentPosition;
-    public static String[] ALBUM_NAMES;
+    public static String[] TRANSITION_NAMES;
 
     static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
     static final String EXTRA_CURRENT_ALBUM_POSITION = "extra_current_item_position";
@@ -65,6 +65,9 @@ public class ArticleListActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_article_list_with_coordinatorlayout);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (mCallback == null) {
+                defineCallback();
+            }
             setExitSharedElementCallback(mCallback);
         }
 
@@ -91,7 +94,6 @@ public class ArticleListActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             refresh();
         }
-        defineCallback();
     }
 
     private void defineCallback() {
@@ -101,15 +103,18 @@ public class ArticleListActivity extends AppCompatActivity implements
                 public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
                     Log.v(TAG,"onMapSharedElements - start - mTmpReenterState: " + mTmpReenterState);
                     if (mTmpReenterState != null) {
-                        int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
-                        int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
-                        if (startingPosition != currentPosition) {
+//                        int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
+//                        int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
+
+                        int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
+                        if (mOriginalCurrentPosition != currentPosition) {
                             // If startingPosition != currentPosition the user must have swiped to a
                             // different page in the DetailsActivity. We must update the shared element
                             // so that the correct one falls into place.
-                            String newTransitionName = ALBUM_NAMES[currentPosition];
+                            String newTransitionName = TRANSITION_NAMES[currentPosition];
                             View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
-                            Log.v(TAG,"onMapSharedElements - startingPosition/currentPosition: " + startingPosition + "/" + currentPosition);
+                            Log.v(TAG,"onMapSharedElements - startingPosition/currentPosition: " + mOriginalCurrentPosition + "/" + currentPosition);
+                            Log.v(TAG,"onMapSharedElements - newTransitionName/newSharedElement: " + newTransitionName + "/" + newSharedElement);
                             if (newSharedElement != null) {
                                 names.clear();
                                 names.add(newTransitionName);
@@ -262,7 +267,7 @@ public class ArticleListActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        ALBUM_NAMES = new String[cursor.getCount()];
+        TRANSITION_NAMES = new String[cursor.getCount()];
         Adapter adapter = new Adapter(cursor);
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
@@ -295,25 +300,23 @@ public class ArticleListActivity extends AppCompatActivity implements
             View view = getLayoutInflater().inflate(R.layout.list_item_article, parent, false);
             final ViewHolder vh = new ViewHolder(view);
             view.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View view) {
+                    if (mIsRefreshing) {
+                        // FIXME: 26/05/2016 - the SnackBar below shoud disappear after few seconds
+                        showSnackBar(R.string.db_update_in_progress);
+                        return;
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        Intent intent = new Intent(getApplicationContext(), ArticleDetailActivity.class);
-//                        intent.putExtra(EXTRA_STARTING_ALBUM_POSITION, getItemId(vh.getAdapterPosition()));
-
-//                        Log.v(TAG, "onCreateView - mIsDetailsActivityStarted/transitionName: " + mIsDetailsActivityStarted + "/" + vh.thumbnailView.getTransitionName());
-                        Log.v(TAG, "onCreateViewHolder - mIsDetailsActivityStarted/transitionName: " + mIsDetailsActivityStarted + "/" + vh.titleView.getTransitionName());
+//                        Log.v(TAG, "onCreateViewHolder - mIsDetailsActivityStarted/transitionName: " + mIsDetailsActivityStarted + "/" + vh.titleView.getTransitionName());
                         if (!mIsDetailsActivityStarted) {
                             mIsDetailsActivityStarted = true;
                             Log.v(TAG, "onCreateViewHolder - starting activity with ActivityOptions.makeSceneTransitionAnimation");
-//                            startActivity(intent,ActivityOptions.makeSceneTransitionAnimation(ArticleListActivity.this,
-//                                    vh.thumbnailView, vh.thumbnailView.getTransitionName()).toBundle());
                             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(ArticleListActivity.this, vh.thumbnailView, vh.thumbnailView.getTransitionName());
                             ActivityCompat.startActivity(ArticleListActivity.this, new Intent(Intent.ACTION_VIEW, ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))),
-//                                    ActivityOptions.makeSceneTransitionAnimation(ArticleListActivity.this,
                                     options.toBundle());
                             mOriginalCurrentPosition = vh.thisViewHolderPosition;
-//                                    vh.titleView, vh.titleView.getTransitionName()).toBundle());
                         }
                     } else {
                         startActivity(new Intent(Intent.ACTION_VIEW,
@@ -328,8 +331,8 @@ public class ArticleListActivity extends AppCompatActivity implements
         public void onBindViewHolder(ViewHolder holder, int position) {
             mCursor.moveToPosition(position);
             holder.thisViewHolderPosition = position;
-            holder.titleView.setText(position + "-" + mCursor.getString(ArticleLoader.Query.TITLE));
-            ALBUM_NAMES[position] = mCursor.getString(ArticleLoader.Query.TITLE);
+            String articleTitle = mCursor.getString(ArticleLoader.Query.TITLE);
+            holder.titleView.setText(position + "-" + articleTitle);
             holder.subtitleView.setText(
                     DateUtils.getRelativeTimeSpanString(
                             mCursor.getLong(ArticleLoader.Query.PUBLISHED_DATE),
@@ -342,7 +345,9 @@ public class ArticleListActivity extends AppCompatActivity implements
                     ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
             holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.thumbnailView.setTransitionName(mCursor.getString(ArticleLoader.Query.TITLE));
+                TRANSITION_NAMES[position] = articleTitle;
+                holder.thumbnailView.setTransitionName(articleTitle);
+                holder.thumbnailView.setTag(articleTitle);
             }
         }
 

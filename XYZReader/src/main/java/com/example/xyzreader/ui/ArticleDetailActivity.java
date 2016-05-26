@@ -58,6 +58,9 @@ public class ArticleDetailActivity extends AppCompatActivity
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             postponeEnterTransition();
+            if (mCallback == null) {
+                defineCallback();
+            }
             setEnterSharedElementCallback(mCallback);
         }
         setContentView(R.layout.activity_article_detail);
@@ -120,9 +123,6 @@ public class ArticleDetailActivity extends AppCompatActivity
                 mSelectedItemId = mStartId;
             }
         }
-        if (mCallback == null) {
-            defineCallback();
-        }
         Log.v(TAG, "onCreate - mStartId/mSelectedItemId: " + mStartId + "/" + mSelectedItemId);
     }
 
@@ -137,7 +137,7 @@ public class ArticleDetailActivity extends AppCompatActivity
             mCallback = new SharedElementCallback() {
                 @Override
                 public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-                    Log.v(TAG, "defineCallback - mIsReturning: " + mIsReturning);
+                    Log.v(TAG, "onMapSharedElements - mIsReturning: " + mIsReturning);
                     if (mIsReturning) {
                         ImageView sharedElement = mCurrentDetailsFragment.getAlbumImage();
                         if (sharedElement == null) {

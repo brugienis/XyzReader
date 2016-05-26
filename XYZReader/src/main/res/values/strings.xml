@@ -14,6 +14,7 @@
     <string name="broadcast_error_updating_content">Error updating content - try again later.</string>
     <string name="broadcast_error_received_invalid_data">Received invalid data - try again later.</string>
     <string name="network_connection_problems">Network problems - try again later.</string>
+    <string name="db_update_in_progress">Updating database - try again later.</string>
     <string name="transition_name_photo">transition_name_photo</string>
     <string name="transition_name_title">transition_name_title</string>
 
