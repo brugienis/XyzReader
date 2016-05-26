@@ -45,11 +45,13 @@ public class ArticleDetailFragment extends Fragment implements
 
     public static final String ARG_ITEM_ID = "item_id";
     public static final String ARG_START_ITEM_ID = "start_item_id";
+    public static final String ARG_START_POSITION = "start_position";
     public static final String ARG_THIS_FRAGMENT_POSITION = "this_fragment_position";
     private static final float PARALLAX_FACTOR = 1.25f;
 
     private Cursor mCursor;
 
+    private int mStartPosition;
     private int mThisFragmentPosition;
     private long mItemId;
     private long mStartItemId;
@@ -73,9 +75,10 @@ public class ArticleDetailFragment extends Fragment implements
     public ArticleDetailFragment() {
     }
 
-    public static ArticleDetailFragment newInstance(int position, long itemId, long startItemId) {
+    public static ArticleDetailFragment newInstance(int startPosition, int position, long itemId, long startItemId) {
 //        Log.v(TAG, "newInstance - itemId/startItemId: " + itemId + "/" + startItemId);
         Bundle arguments = new Bundle();
+        arguments.putInt(ARG_START_POSITION, startPosition);
         arguments.putInt(ARG_THIS_FRAGMENT_POSITION, position);
         arguments.putLong(ARG_ITEM_ID, itemId);
         arguments.putLong(ARG_START_ITEM_ID, startItemId);
@@ -89,6 +92,7 @@ public class ArticleDetailFragment extends Fragment implements
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
+            mStartPosition = getArguments().getInt(ARG_START_POSITION);
             mThisFragmentPosition = getArguments().getInt(ARG_THIS_FRAGMENT_POSITION);
             mItemId = getArguments().getLong(ARG_ITEM_ID);
             mStartItemId = getArguments().getLong(ARG_START_ITEM_ID);
@@ -221,6 +225,7 @@ public class ArticleDetailFragment extends Fragment implements
             bodyView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.BODY)));
             ImageLoaderHelper.getInstance(getActivity()).getImageLoader()
                     .get(mCursor.getString(ArticleLoader.Query.PHOTO_URL), new ImageLoader.ImageListener() {
+
                         @Override
                         public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
                             Bitmap bitmap = imageContainer.getBitmap();
@@ -230,8 +235,11 @@ public class ArticleDetailFragment extends Fragment implements
                                 mMutedColor = p.getDarkMutedColor(0xFF333333);
                                 mPhotoView.setImageBitmap(imageContainer.getBitmap());
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                    mPhotoView.setTransitionName(mCursor.getString(ArticleLoader.Query.TITLE));
-                                    Log.v(TAG, "bindViews - transitionName: " + mCursor.getString(ArticleLoader.Query.TITLE));
+                                    // when scrolling very fast, cursor can be null
+                                    if (mCursor != null) {
+                                        mPhotoView.setTransitionName(mCursor.getString(ArticleLoader.Query.TITLE));
+//                                        Log.v(TAG, "bindViews - transitionName: " + mCursor.getString(ArticleLoader.Query.TITLE));
+                                    }
                                 }
 
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -342,6 +350,10 @@ public class ArticleDetailFragment extends Fragment implements
         Rect containerBounds = new Rect();
         container.getHitRect(containerBounds);
         return view.getLocalVisibleRect(containerBounds);
+    }
+
+    public int getStartPosition() {
+        return mStartPosition;
     }
 
     public int getThisFragmentPosition() {

@@ -6,6 +6,11 @@
             <target android:excludeId="@android:id/navigationBarBackground" />
         </targets>
     </fade>
+    <changeTransform />
+    <changeBounds />
+</transitionSet>
+<!--
+
     <slide android:slideEdge="top">
         <targets>
             <target android:targetId="@id/photo_container" />
@@ -16,10 +21,12 @@
             <target android:targetId="@id/meta_bar" />
         </targets>
     </slide>
-    <changeTransform />
-    <changeBounds />
-</transitionSet>
-<!--
+
+
+
+
+
+
 <transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
                android:transitionOrdering="together"
                android:duration="500">

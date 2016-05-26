@@ -48,7 +48,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     private RecyclerView mRecyclerView;
     private View mCoordinatorlayout;
     private boolean mIsDetailsActivityStarted;
-    private int mCurrentPosition;
+    private int mOriginalCurrentPosition;
     public static String[] ALBUM_NAMES;
 
     static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
@@ -63,6 +63,10 @@ public class ArticleListActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_article_list);
         setContentView(R.layout.activity_article_list_with_coordinatorlayout);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setExitSharedElementCallback(mCallback);
+        }
 
         mCoordinatorlayout = findViewById(R.id.articleListActivity);
 
@@ -95,6 +99,7 @@ public class ArticleListActivity extends AppCompatActivity implements
             mCallback = new SharedElementCallback() {
                 @Override
                 public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                    Log.v(TAG,"onMapSharedElements - start - mTmpReenterState: " + mTmpReenterState);
                     if (mTmpReenterState != null) {
                         int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
                         int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
@@ -104,6 +109,7 @@ public class ArticleListActivity extends AppCompatActivity implements
                             // so that the correct one falls into place.
                             String newTransitionName = ALBUM_NAMES[currentPosition];
                             View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
+                            Log.v(TAG,"onMapSharedElements - startingPosition/currentPosition: " + startingPosition + "/" + currentPosition);
                             if (newSharedElement != null) {
                                 names.clear();
                                 names.add(newTransitionName);
@@ -114,6 +120,7 @@ public class ArticleListActivity extends AppCompatActivity implements
 
                         mTmpReenterState = null;
                     } else {
+                        Log.v(TAG,"onMapSharedElements - the activity is exiting");
                         // If mTmpReenterState is null, then the activity is exiting.
                         View navigationBar = findViewById(android.R.id.navigationBarBackground);
                         View statusBar = findViewById(android.R.id.statusBarBackground);
@@ -126,6 +133,19 @@ public class ArticleListActivity extends AppCompatActivity implements
                             sharedElements.put(statusBar.getTransitionName(), statusBar);
                         }
                     }
+                }
+
+                @Override
+                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
+                    Log.v(TAG,"onSharedElementStart - start");
+                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
+                }
+
+                @Override
+                public void onSharedElementEnd(List<String> sharedElementNames,
+                                               List<View> sharedElements, List<View> sharedElementSnapshots) {
+                    Log.v(TAG,"onSharedElementEnd - start");
+                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
                 }
             };
         }
@@ -161,18 +181,34 @@ public class ArticleListActivity extends AppCompatActivity implements
         super.onStop();
         unregisterReceiver(mRefreshingReceiver);
     }
+//http://www.androiddesignpatterns.com/2015/03/activity-postponed-shared-element-transitions-part3b.html
 
+    //http://stackoverflow.com/questions/28975840/feature-activity-transitions-vs-feature-content-transitions
+
+    //android developers FEATURE_ACTIVITY_TRANSITIONS
     @Override
     public void onActivityReenter(int requestCode, Intent data) {
         super.onActivityReenter(requestCode, data);
         mTmpReenterState = new Bundle(data.getExtras());
         // FIXME: 25/05/2016 - how to get the position?
+//        mOriginalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
         long startId = mTmpReenterState.getLong(EXTRA_STARTING_ALBUM_POSITION);
         long selectedId = mTmpReenterState.getLong(EXTRA_CURRENT_ALBUM_POSITION);
-        Log.v(TAG, "onActivityReenter - currentPosition/startId/selectedId : " + currentPosition + "/" + startId + "/" + selectedId);
-        if (startId != selectedId) {
+        Log.v(TAG, "onActivityReenter - mOriginalCurrentPosition/currentPosition/startId/selectedId : " + mOriginalCurrentPosition + "/" + currentPosition + "/" + startId + "/" + selectedId);
+//        if (startId != selectedId) {
+        if (currentPosition != mOriginalCurrentPosition) {
             mRecyclerView.scrollToPosition(currentPosition);
+//            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//                @Override
+//                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//                    super.onScrolled(recyclerView, dx, dy);
+//                    // FIXME: 26/05/2016 - how to remove OnScrollListener
+////                    mRecyclerView.removeOnScrollListener();
+//                    Log.v(TAG, "onScrolled - start");
+//                }
+//            });
+
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             postponeEnterTransition();
@@ -184,6 +220,7 @@ public class ArticleListActivity extends AppCompatActivity implements
                 // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
                 mRecyclerView.requestLayout();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    Log.v(TAG, "onPreDraw - calling startPostponedEnterTransition");
                     startPostponedEnterTransition();
                 }
                 return true;
@@ -275,7 +312,7 @@ public class ArticleListActivity extends AppCompatActivity implements
                             ActivityCompat.startActivity(ArticleListActivity.this, new Intent(Intent.ACTION_VIEW, ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))),
 //                                    ActivityOptions.makeSceneTransitionAnimation(ArticleListActivity.this,
                                     options.toBundle());
-                            mCurrentPosition = vh.thisViewHolderPosition;
+                            mOriginalCurrentPosition = vh.thisViewHolderPosition;
 //                                    vh.titleView, vh.titleView.getTransitionName()).toBundle());
                         }
                     } else {
@@ -291,7 +328,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         public void onBindViewHolder(ViewHolder holder, int position) {
             mCursor.moveToPosition(position);
             holder.thisViewHolderPosition = position;
-            holder.titleView.setText(mCursor.getString(ArticleLoader.Query.TITLE));
+            holder.titleView.setText(position + "-" + mCursor.getString(ArticleLoader.Query.TITLE));
             ALBUM_NAMES[position] = mCursor.getString(ArticleLoader.Query.TITLE);
             holder.subtitleView.setText(
                     DateUtils.getRelativeTimeSpanString(

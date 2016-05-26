@@ -6,6 +6,12 @@
         <item name="colorAccent">#FF4081</item>
 
         <item name="android:windowContentTransitions">true</item>
+
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/change_image_transform</item>
+        <item name="android:windowSharedElementExitTransition">
+            @transition/change_image_transform</item>
+
     </style>
 
 
@@ -16,6 +22,12 @@
 
 <!--
 
+        <item name="android:windowEnterTransition">
+            @transition/details_window_enter_transition
+        </item>
+        <item name="android:windowReturnTransition">
+            @transition/details_window_return_transition
+        </item>
 
 
         <item name="android:windowEnterTransition">

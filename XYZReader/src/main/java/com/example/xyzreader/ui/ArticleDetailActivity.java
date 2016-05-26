@@ -178,6 +178,7 @@ public class ArticleDetailActivity extends AppCompatActivity
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         mCursor = cursor;
         mPagerAdapter.notifyDataSetChanged();
+        Log.v(TAG,"onLoadFinished - cursor count: " + cursor.getCount());
 
         // Select the start ID
         if (mStartId > 0) {
@@ -235,7 +236,7 @@ public class ArticleDetailActivity extends AppCompatActivity
         public Fragment getItem(int position) {
 //            Log.v(TAG, "getItem - position: " + position);
             mCursor.moveToPosition(position);
-            return ArticleDetailFragment.newInstance(position, mCursor.getLong(ArticleLoader.Query._ID), mSelectedItemId);
+            return ArticleDetailFragment.newInstance(-1, position, mCursor.getLong(ArticleLoader.Query._ID), mSelectedItemId);
         }
 
         @Override
@@ -247,12 +248,14 @@ public class ArticleDetailActivity extends AppCompatActivity
     public static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
     static final String EXTRA_CURRENT_ALBUM_POSITION = "extra_current_item_position";
     static final String EXTRA_THIS_CURRENT_POSITION = "extra_this_current_position";
+    static final String EXTRA_ORIGINAL_CURRENT_POSITION = "extra_original_current_position";
 
     @Override
     public void finishAfterTransition() {
         mIsReturning = true;
         Log.v(TAG, "finishAfterTransition - mIsReturning: " + mIsReturning);
         Intent data = new Intent();
+        data.putExtra(EXTRA_ORIGINAL_CURRENT_POSITION, mCurrentDetailsFragment.getStartPosition());
         data.putExtra(EXTRA_THIS_CURRENT_POSITION, mCurrentDetailsFragment.getThisFragmentPosition());
         data.putExtra(EXTRA_STARTING_ALBUM_POSITION, mStartId); //mStartId != mSelectedItemId
         data.putExtra(EXTRA_CURRENT_ALBUM_POSITION, mSelectedItemId);
