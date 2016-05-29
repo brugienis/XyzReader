@@ -51,7 +51,6 @@ public class ArticleDetailFragment extends Fragment implements
 
     private Cursor mCursor;
 
-    private int mStartPosition;
     private int mThisFragmentPosition;
     private long mItemId;
     private long mStartItemId;
@@ -76,7 +75,6 @@ public class ArticleDetailFragment extends Fragment implements
     }
 
     public static ArticleDetailFragment newInstance(int startPosition, int position, long itemId, long startItemId) {
-//        Log.v(TAG, "newInstance - itemId/startItemId: " + itemId + "/" + startItemId);
         Bundle arguments = new Bundle();
         arguments.putInt(ARG_START_POSITION, startPosition);
         arguments.putInt(ARG_THIS_FRAGMENT_POSITION, position);
@@ -92,7 +90,6 @@ public class ArticleDetailFragment extends Fragment implements
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
-            mStartPosition = getArguments().getInt(ARG_START_POSITION);
             mThisFragmentPosition = getArguments().getInt(ARG_THIS_FRAGMENT_POSITION);
             mItemId = getArguments().getLong(ARG_ITEM_ID);
             mStartItemId = getArguments().getLong(ARG_START_ITEM_ID);
@@ -268,8 +265,8 @@ public class ArticleDetailFragment extends Fragment implements
     }
 
     private void startPostponedEnterTransition() {
-        // FIXME: 24/05/2016 - make sure to add the listener below if positions are equel
-        if (mItemId == mStartItemId) {
+        // FIXME: 24/05/2016 - make sure to add the listener below if positions are equal
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && mItemId == mStartItemId) {
             Log.v(TAG, "startPostponedEnterTransition - setting addOnPreDrawListener = mItemId/mStartItemId: " + mItemId + "/" + mStartItemId);
             mPhotoView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
@@ -298,6 +295,7 @@ public class ArticleDetailFragment extends Fragment implements
 
         mCursor = cursor;
         if (mCursor != null && !mCursor.moveToFirst()) {
+            // FIXME: 29/05/2016 - show Snackbar
             Log.e(TAG, "Error reading item detail cursor");
             mCursor.close();
             mCursor = null;
@@ -350,10 +348,6 @@ public class ArticleDetailFragment extends Fragment implements
         Rect containerBounds = new Rect();
         container.getHitRect(containerBounds);
         return view.getLocalVisibleRect(containerBounds);
-    }
-
-    public int getStartPosition() {
-        return mStartPosition;
     }
 
     public int getThisFragmentPosition() {

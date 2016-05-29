@@ -48,13 +48,11 @@ public class ArticleListActivity extends AppCompatActivity implements
     private RecyclerView mRecyclerView;
     private View mCoordinatorlayout;
     private boolean mIsDetailsActivityStarted;
-    private int mOriginalCurrentPosition;
     public static String[] TRANSITION_NAMES;
-
-    static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
-    static final String EXTRA_CURRENT_ALBUM_POSITION = "extra_current_item_position";
     private Bundle mTmpReenterState;
     private SharedElementCallback mCallback = null;
+
+    public static final String LIST_SELECTED_ARTICLE_POSITION = "com.example.xyzreader.ui.LIST_SELECTED_ARTICLE_POSITION";
 
     private static final String TAG = ArticleListActivity.class.getSimpleName();
 
@@ -65,9 +63,47 @@ public class ArticleListActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_article_list_with_coordinatorlayout);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (mCallback == null) {
-                defineCallback();
-            }
+            final SharedElementCallback mCallback = new SharedElementCallback() {
+                @Override
+                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                    Log.v(TAG,"onMapSharedElements - start - mTmpReenterState: " + mTmpReenterState);
+                    if (mTmpReenterState != null) {
+                        int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
+                        int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
+                        if (originalCurrentPosition != currentPosition) {
+                            // If startingPosition != currentPosition the user must have swiped to a
+                            // different page in the DetailsActivity. We must update the shared element
+                            // so that the correct one falls into place.
+                            String newTransitionName = TRANSITION_NAMES[currentPosition];
+                            View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
+                            Log.v(TAG,"onMapSharedElements - originalCurrentPosition/currentPosition: " + originalCurrentPosition + "/" + currentPosition);
+                            Log.v(TAG,"onMapSharedElements - newTransitionName/newSharedElement: " + newTransitionName + "/" + newSharedElement);
+                            if (newSharedElement != null) {
+                                names.clear();
+                                names.add(newTransitionName);
+                                sharedElements.clear();
+                                sharedElements.put(newTransitionName, newSharedElement);
+                            }
+                        }
+
+                        mTmpReenterState = null;
+                    } else {
+                        Log.v(TAG,"onMapSharedElements - the activity is exiting");
+                        // If mTmpReenterState is null, then the activity is exiting.
+                        View navigationBar = findViewById(android.R.id.navigationBarBackground);
+                        View statusBar = findViewById(android.R.id.statusBarBackground);
+                        if (navigationBar != null) {
+                            names.add(navigationBar.getTransitionName());
+                            sharedElements.put(navigationBar.getTransitionName(), navigationBar);
+                        }
+                        if (statusBar != null) {
+                            names.add(statusBar.getTransitionName());
+                            sharedElements.put(statusBar.getTransitionName(), statusBar);
+                        }
+                    }
+                }
+            };
+//            defineCallback();
             setExitSharedElementCallback(mCallback);
         }
 
@@ -96,75 +132,73 @@ public class ArticleListActivity extends AppCompatActivity implements
         }
     }
 
-    private void defineCallback() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mCallback = new SharedElementCallback() {
-                @Override
-                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-                    Log.v(TAG,"onMapSharedElements - start - mTmpReenterState: " + mTmpReenterState);
-                    if (mTmpReenterState != null) {
-//                        int startingPosition = mTmpReenterState.getInt(EXTRA_STARTING_ALBUM_POSITION);
-//                        int currentPosition = mTmpReenterState.getInt(EXTRA_CURRENT_ALBUM_POSITION);
+//    private void defineCallback() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            final SharedElementCallback mCallback = new SharedElementCallback() {
+//                @Override
+//                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+//                    Log.v(TAG,"onMapSharedElements - start - mTmpReenterState: " + mTmpReenterState);
+//                    if (mTmpReenterState != null) {
+//                        int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
+//                        int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
+//                        if (originalCurrentPosition != currentPosition) {
+//                            // If startingPosition != currentPosition the user must have swiped to a
+//                            // different page in the DetailsActivity. We must update the shared element
+//                            // so that the correct one falls into place.
+//                            String newTransitionName = TRANSITION_NAMES[currentPosition];
+//                            View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
+//                            Log.v(TAG,"onMapSharedElements - originalCurrentPosition/currentPosition: " + originalCurrentPosition + "/" + currentPosition);
+//                            Log.v(TAG,"onMapSharedElements - newTransitionName/newSharedElement: " + newTransitionName + "/" + newSharedElement);
+//                            if (newSharedElement != null) {
+//                                names.clear();
+//                                names.add(newTransitionName);
+//                                sharedElements.clear();
+//                                sharedElements.put(newTransitionName, newSharedElement);
+//                            }
+//                        }
+//
+//                        mTmpReenterState = null;
+//                    } else {
+//                        Log.v(TAG,"onMapSharedElements - the activity is exiting");
+//                        // If mTmpReenterState is null, then the activity is exiting.
+//                        View navigationBar = findViewById(android.R.id.navigationBarBackground);
+//                        View statusBar = findViewById(android.R.id.statusBarBackground);
+//                        if (navigationBar != null) {
+//                            names.add(navigationBar.getTransitionName());
+//                            sharedElements.put(navigationBar.getTransitionName(), navigationBar);
+//                        }
+//                        if (statusBar != null) {
+//                            names.add(statusBar.getTransitionName());
+//                            sharedElements.put(statusBar.getTransitionName(), statusBar);
+//                        }
+//                    }
+//                }
 
-                        int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
-                        if (mOriginalCurrentPosition != currentPosition) {
-                            // If startingPosition != currentPosition the user must have swiped to a
-                            // different page in the DetailsActivity. We must update the shared element
-                            // so that the correct one falls into place.
-                            String newTransitionName = TRANSITION_NAMES[currentPosition];
-                            View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
-                            Log.v(TAG,"onMapSharedElements - startingPosition/currentPosition: " + mOriginalCurrentPosition + "/" + currentPosition);
-                            Log.v(TAG,"onMapSharedElements - newTransitionName/newSharedElement: " + newTransitionName + "/" + newSharedElement);
-                            if (newSharedElement != null) {
-                                names.clear();
-                                names.add(newTransitionName);
-                                sharedElements.clear();
-                                sharedElements.put(newTransitionName, newSharedElement);
-                            }
-                        }
-
-                        mTmpReenterState = null;
-                    } else {
-                        Log.v(TAG,"onMapSharedElements - the activity is exiting");
-                        // If mTmpReenterState is null, then the activity is exiting.
-                        View navigationBar = findViewById(android.R.id.navigationBarBackground);
-                        View statusBar = findViewById(android.R.id.statusBarBackground);
-                        if (navigationBar != null) {
-                            names.add(navigationBar.getTransitionName());
-                            sharedElements.put(navigationBar.getTransitionName(), navigationBar);
-                        }
-                        if (statusBar != null) {
-                            names.add(statusBar.getTransitionName());
-                            sharedElements.put(statusBar.getTransitionName(), statusBar);
-                        }
-                    }
-                }
-
-                @Override
-                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-                    Log.v(TAG,"onSharedElementStart - start");
-                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
-                }
-
-                @Override
-                public void onSharedElementEnd(List<String> sharedElementNames,
-                                               List<View> sharedElements, List<View> sharedElementSnapshots) {
-                    Log.v(TAG,"onSharedElementEnd - start");
-                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
-                }
-            };
-        }
-    }
+//                @Override
+//                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
+//                    Log.v(TAG,"onSharedElementStart - start");
+//                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
+//                }
+//
+//                @Override
+//                public void onSharedElementEnd(List<String> sharedElementNames,
+//                                               List<View> sharedElements, List<View> sharedElementSnapshots) {
+//                    Log.v(TAG,"onSharedElementEnd - start");
+//                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
+//                }
+//            };
+//        }
+//    }
 
     /**
      * Start new search.
      */
     private void refresh() {
-        Log.v(TAG, "refresh - called - mIsRefreshing: " + mIsRefreshing);
+//        Log.v(TAG, "refresh - called - mIsRefreshing: " + mIsRefreshing);
         if (!mIsRefreshing) {
             startService(new Intent(this, UpdaterService.class));
         } else {
-            Log.v(TAG, "refresh - refreshing skipped - mIsRefreshing: " + mIsRefreshing);
+//            Log.v(TAG, "refresh - refreshing skipped - mIsRefreshing: " + mIsRefreshing);
         }
     }
 
@@ -195,24 +229,11 @@ public class ArticleListActivity extends AppCompatActivity implements
     public void onActivityReenter(int requestCode, Intent data) {
         super.onActivityReenter(requestCode, data);
         mTmpReenterState = new Bundle(data.getExtras());
-        // FIXME: 25/05/2016 - how to get the position?
-//        mOriginalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
+        int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
-        long startId = mTmpReenterState.getLong(EXTRA_STARTING_ALBUM_POSITION);
-        long selectedId = mTmpReenterState.getLong(EXTRA_CURRENT_ALBUM_POSITION);
-        Log.v(TAG, "onActivityReenter - mOriginalCurrentPosition/currentPosition/startId/selectedId : " + mOriginalCurrentPosition + "/" + currentPosition + "/" + startId + "/" + selectedId);
-//        if (startId != selectedId) {
-        if (currentPosition != mOriginalCurrentPosition) {
+        Log.v(TAG, "onActivityReenter - originalCurrentPosition/currentPosition/startId/selectedId : " + originalCurrentPosition + "/" + currentPosition);
+        if (currentPosition != originalCurrentPosition) {
             mRecyclerView.scrollToPosition(currentPosition);
-//            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//                @Override
-//                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                    super.onScrolled(recyclerView, dx, dy);
-//                    // FIXME: 26/05/2016 - how to remove OnScrollListener
-////                    mRecyclerView.removeOnScrollListener();
-//                    Log.v(TAG, "onScrolled - start");
-//                }
-//            });
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -238,17 +259,13 @@ public class ArticleListActivity extends AppCompatActivity implements
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-//            Log.v(TAG, "onReceive - action:" + intent.getAction());
             if (UpdaterService.BROADCAST_ACTION_STATE_CHANGE.equals(intent.getAction())) {
-//                String networkProblemMessage = intent.getStringExtra(UpdaterService.EXTRA_NETWORK_PROBLEM);
                 if (intent.hasExtra(UpdaterService.EXTRA_NETWORK_PROBLEM)) {
                     mIsRefreshing = false;
                     int networkProblemMessageInt = intent.getIntExtra(UpdaterService.EXTRA_NETWORK_PROBLEM, -1);
-//                    Log.v(TAG, "networkProblemMessageInt: " + networkProblemMessageInt);
-                    showSnackBar(networkProblemMessageInt);
+                    showSnackBar(networkProblemMessageInt, true);
                 } else {
                     mIsRefreshing = intent.getBooleanExtra(UpdaterService.EXTRA_REFRESHING, false);
-//                    Log.v(TAG, "onReceive - mIsRefreshing updated: " + mIsRefreshing);
                 }
                 updateRefreshingUI();
             }
@@ -257,7 +274,6 @@ public class ArticleListActivity extends AppCompatActivity implements
 
     private void updateRefreshingUI() {
         mSwipeRefreshLayout.setRefreshing(mIsRefreshing);
-//        showSnackBar(R.string.snack_test);
     }
 
     @Override
@@ -304,23 +320,26 @@ public class ArticleListActivity extends AppCompatActivity implements
                 @Override
                 public void onClick(View view) {
                     if (mIsRefreshing) {
-                        // FIXME: 26/05/2016 - the SnackBar below shoud disappear after few seconds
-                        showSnackBar(R.string.db_update_in_progress);
+                        // FIXME: 26/05/2016 - the SnackBar below should disappear after few seconds
+                        showSnackBar(R.string.db_update_in_progress, false);
                         return;
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                        Log.v(TAG, "onCreateViewHolder - mIsDetailsActivityStarted/transitionName: " + mIsDetailsActivityStarted + "/" + vh.titleView.getTransitionName());
-                        if (!mIsDetailsActivityStarted) {
-                            mIsDetailsActivityStarted = true;
+                    Bundle bundle = null;
+                    if (!mIsDetailsActivityStarted) {
+                        mIsDetailsActivityStarted = true;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             Log.v(TAG, "onCreateViewHolder - starting activity with ActivityOptions.makeSceneTransitionAnimation");
-                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(ArticleListActivity.this, vh.thumbnailView, vh.thumbnailView.getTransitionName());
-                            ActivityCompat.startActivity(ArticleListActivity.this, new Intent(Intent.ACTION_VIEW, ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))),
-                                    options.toBundle());
-                            mOriginalCurrentPosition = vh.thisViewHolderPosition;
+                            ActivityOptionsCompat options =
+                                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                            ArticleListActivity.this,
+                                            vh.thumbnailView,
+                                            vh.thumbnailView.getTransitionName());
+                            bundle = options.toBundle();
                         }
-                    } else {
-                        startActivity(new Intent(Intent.ACTION_VIEW,
-                                ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
+                        Intent intent = new Intent(Intent.ACTION_VIEW,
+                                ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition())));
+                        intent.putExtra(LIST_SELECTED_ARTICLE_POSITION, vh.getAdapterPosition());
+                        ActivityCompat.startActivity(ArticleListActivity.this, intent, bundle);
                     }
                 }
             });
@@ -371,10 +390,9 @@ public class ArticleListActivity extends AppCompatActivity implements
         }
     }
 
-    public void showSnackBar(int msg) {
+    public void showSnackBar(int msg, boolean showIndefinite) {
         Snackbar
-                .make(mCoordinatorlayout, msg, Snackbar.LENGTH_INDEFINITE)
-                .setAction("XX", null)
+                .make(mCoordinatorlayout, msg, (showIndefinite ? Snackbar.LENGTH_INDEFINITE : Snackbar.LENGTH_LONG))
                 .setActionTextColor(Color.RED)
                 .show(); // Don’t forget to show!
     }
