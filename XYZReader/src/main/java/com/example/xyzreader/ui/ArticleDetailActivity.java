@@ -47,8 +47,10 @@ public class ArticleDetailActivity extends AppCompatActivity
     private View mUpButton;
 
     private boolean mIsReturning;
+
+    static final String EXTRA_THIS_CURRENT_POSITION = "extra_this_current_position";
+    static final String EXTRA_ORIGINAL_CURRENT_POSITION = "extra_original_current_position";
     private ArticleDetailFragment mCurrentDetailsFragment;
-//    private SharedElementCallback mCallback = null;
 
     private static final String TAG = ArticleDetailActivity.class.getSimpleName();
 
@@ -60,9 +62,6 @@ public class ArticleDetailActivity extends AppCompatActivity
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             postponeEnterTransition();
-//            if (mCallback == null) {
-//                defineCallback();
-//            }
             final SharedElementCallback mCallback = new SharedElementCallback() {
                 @Override
                 public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -176,6 +175,7 @@ public class ArticleDetailActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
 
         outState.putInt(ArticleListActivity.LIST_SELECTED_ARTICLE_POSITION, mListSelectedArticlePosition);
+        // FIXME: 30/05/2016 should save also mStartId?
     }
 
     /**
@@ -192,49 +192,6 @@ public class ArticleDetailActivity extends AppCompatActivity
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return ArticleLoader.newAllArticlesInstance(this);
     }
-
-//    private void defineCallback() {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            Log.v(TAG, "defineCallback - defineCallback - start");
-//            mCallback = new SharedElementCallback() {
-//                @Override
-//                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-//                    Log.v(TAG, "onMapSharedElements - mIsReturning: " + mIsReturning);
-//                    if (mIsReturning) {
-//                        ImageView sharedElement = mCurrentDetailsFragment.getAlbumImage();
-//                        if (sharedElement == null) {
-//                            // If shared element is null, then it has been scrolled off screen and
-//                            // no longer visible. In this case we cancel the shared element transition by
-//                            // removing the shared element from the shared elements map.
-//                            names.clear();
-//                            sharedElements.clear();
-//                        } else if (mStartId != mSelectedItemId) {
-//                            // If the user has swiped to a different ViewPager page, then we need to
-//                            // remove the old shared element and replace it with the new shared element
-//                            // that should be transitioned instead.
-//                            names.clear();
-//                            names.add(sharedElement.getTransitionName());
-//                            sharedElements.clear();
-//                            sharedElements.put(sharedElement.getTransitionName(), sharedElement);
-//                        }
-//                    }
-//                }
-//
-//                @Override
-//                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-//                    Log.v(TAG,"onSharedElementStart - start");
-//                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
-//                }
-//
-//                @Override
-//                public void onSharedElementEnd(List<String> sharedElementNames,
-//                                               List<View> sharedElements, List<View> sharedElementSnapshots) {
-//                    Log.v(TAG,"onSharedElementEnd - start");
-//                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
-//                }
-//            };
-//        }
-//    }
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
@@ -279,13 +236,11 @@ public class ArticleDetailActivity extends AppCompatActivity
     private class MyPagerAdapter extends FragmentStatePagerAdapter {
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
-//            Log.v(TAG, "MyPagerAdapter - constructor");
         }
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             super.setPrimaryItem(container, position, object);
-//            Log.v(TAG, "setPrimaryItem - position: " + position);
             ArticleDetailFragment fragment = (ArticleDetailFragment) object;
             mCurrentDetailsFragment = fragment;
             if (fragment != null) {
@@ -296,7 +251,6 @@ public class ArticleDetailActivity extends AppCompatActivity
 
         @Override
         public Fragment getItem(int position) {
-//            Log.v(TAG, "getItem - position: " + position);
             mCursor.moveToPosition(position);
             return ArticleDetailFragment.newInstance(-1, position, mCursor.getLong(ArticleLoader.Query._ID), mSelectedItemId);
         }
@@ -307,20 +261,12 @@ public class ArticleDetailActivity extends AppCompatActivity
         }
     }
 
-    public static final String EXTRA_STARTING_ALBUM_POSITION = "extra_starting_item_position";
-    static final String EXTRA_CURRENT_ALBUM_POSITION = "extra_current_item_position";
-    static final String EXTRA_THIS_CURRENT_POSITION = "extra_this_current_position";
-    static final String EXTRA_ORIGINAL_CURRENT_POSITION = "extra_original_current_position";
-
     @Override
     public void finishAfterTransition() {
         mIsReturning = true;
-        Log.v(TAG, "finishAfterTransition - mIsReturning: " + mIsReturning);
         Intent data = new Intent();
         data.putExtra(EXTRA_ORIGINAL_CURRENT_POSITION, mListSelectedArticlePosition);
         data.putExtra(EXTRA_THIS_CURRENT_POSITION, mCurrentDetailsFragment.getThisFragmentPosition());
-//        data.putExtra(EXTRA_STARTING_ALBUM_POSITION, mStartId); //mStartId != mSelectedItemId
-//        data.putExtra(EXTRA_CURRENT_ALBUM_POSITION, mSelectedItemId);
         setResult(RESULT_OK, data);
         super.finishAfterTransition();
     }

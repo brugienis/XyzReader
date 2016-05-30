@@ -39,6 +39,10 @@ import java.util.Map;
  * handset and tablet-size devices. On handsets, the activity presents a list of items, which when
  * touched, lead to a {@link ArticleDetailActivity} representing item details. On tablets, the
  * activity presents a grid of items as cards.
+ *
+ * Code handling transitions is based on (Alex Lockwood)
+ *     http://stackoverflow.com/questions/27304834/viewpager-fragments-shared-element-transitions and
+ *     repo https://github.com/alexjlockwood/activity-transitions.
  */
 public class ArticleListActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -50,7 +54,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     private boolean mIsDetailsActivityStarted;
     public static String[] TRANSITION_NAMES;
     private Bundle mTmpReenterState;
-    private SharedElementCallback mCallback = null;
+    private boolean mIsRefreshing = false;
 
     public static final String LIST_SELECTED_ARTICLE_POSITION = "com.example.xyzreader.ui.LIST_SELECTED_ARTICLE_POSITION";
 
@@ -66,7 +70,6 @@ public class ArticleListActivity extends AppCompatActivity implements
             final SharedElementCallback mCallback = new SharedElementCallback() {
                 @Override
                 public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-                    Log.v(TAG,"onMapSharedElements - start - mTmpReenterState: " + mTmpReenterState);
                     if (mTmpReenterState != null) {
                         int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
                         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
@@ -88,7 +91,6 @@ public class ArticleListActivity extends AppCompatActivity implements
 
                         mTmpReenterState = null;
                     } else {
-                        Log.v(TAG,"onMapSharedElements - the activity is exiting");
                         // If mTmpReenterState is null, then the activity is exiting.
                         View navigationBar = findViewById(android.R.id.navigationBarBackground);
                         View statusBar = findViewById(android.R.id.statusBarBackground);
@@ -103,7 +105,6 @@ public class ArticleListActivity extends AppCompatActivity implements
                     }
                 }
             };
-//            defineCallback();
             setExitSharedElementCallback(mCallback);
         }
 
@@ -132,73 +133,12 @@ public class ArticleListActivity extends AppCompatActivity implements
         }
     }
 
-//    private void defineCallback() {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            final SharedElementCallback mCallback = new SharedElementCallback() {
-//                @Override
-//                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-//                    Log.v(TAG,"onMapSharedElements - start - mTmpReenterState: " + mTmpReenterState);
-//                    if (mTmpReenterState != null) {
-//                        int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
-//                        int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
-//                        if (originalCurrentPosition != currentPosition) {
-//                            // If startingPosition != currentPosition the user must have swiped to a
-//                            // different page in the DetailsActivity. We must update the shared element
-//                            // so that the correct one falls into place.
-//                            String newTransitionName = TRANSITION_NAMES[currentPosition];
-//                            View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
-//                            Log.v(TAG,"onMapSharedElements - originalCurrentPosition/currentPosition: " + originalCurrentPosition + "/" + currentPosition);
-//                            Log.v(TAG,"onMapSharedElements - newTransitionName/newSharedElement: " + newTransitionName + "/" + newSharedElement);
-//                            if (newSharedElement != null) {
-//                                names.clear();
-//                                names.add(newTransitionName);
-//                                sharedElements.clear();
-//                                sharedElements.put(newTransitionName, newSharedElement);
-//                            }
-//                        }
-//
-//                        mTmpReenterState = null;
-//                    } else {
-//                        Log.v(TAG,"onMapSharedElements - the activity is exiting");
-//                        // If mTmpReenterState is null, then the activity is exiting.
-//                        View navigationBar = findViewById(android.R.id.navigationBarBackground);
-//                        View statusBar = findViewById(android.R.id.statusBarBackground);
-//                        if (navigationBar != null) {
-//                            names.add(navigationBar.getTransitionName());
-//                            sharedElements.put(navigationBar.getTransitionName(), navigationBar);
-//                        }
-//                        if (statusBar != null) {
-//                            names.add(statusBar.getTransitionName());
-//                            sharedElements.put(statusBar.getTransitionName(), statusBar);
-//                        }
-//                    }
-//                }
-
-//                @Override
-//                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-//                    Log.v(TAG,"onSharedElementStart - start");
-//                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
-//                }
-//
-//                @Override
-//                public void onSharedElementEnd(List<String> sharedElementNames,
-//                                               List<View> sharedElements, List<View> sharedElementSnapshots) {
-//                    Log.v(TAG,"onSharedElementEnd - start");
-//                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
-//                }
-//            };
-//        }
-//    }
-
     /**
      * Start new search.
      */
     private void refresh() {
-//        Log.v(TAG, "refresh - called - mIsRefreshing: " + mIsRefreshing);
         if (!mIsRefreshing) {
             startService(new Intent(this, UpdaterService.class));
-        } else {
-//            Log.v(TAG, "refresh - refreshing skipped - mIsRefreshing: " + mIsRefreshing);
         }
     }
 
@@ -220,11 +160,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         super.onStop();
         unregisterReceiver(mRefreshingReceiver);
     }
-//http://www.androiddesignpatterns.com/2015/03/activity-postponed-shared-element-transitions-part3b.html
 
-    //http://stackoverflow.com/questions/28975840/feature-activity-transitions-vs-feature-content-transitions
-
-    //android developers FEATURE_ACTIVITY_TRANSITIONS
     @Override
     public void onActivityReenter(int requestCode, Intent data) {
         super.onActivityReenter(requestCode, data);
@@ -253,8 +189,6 @@ public class ArticleListActivity extends AppCompatActivity implements
             }
         });
     }
-
-    private boolean mIsRefreshing = false;
 
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
         @Override
