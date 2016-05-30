@@ -55,6 +55,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     public static String[] TRANSITION_NAMES;
     private Bundle mTmpReenterState;
     private boolean mIsRefreshing = false;
+    private StaggeredGridLayoutManager staggeredGridLayoutManager;
 
     public static final String LIST_SELECTED_ARTICLE_POSITION = "com.example.xyzreader.ui.LIST_SELECTED_ARTICLE_POSITION";
 
@@ -169,7 +170,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
         Log.v(TAG, "onActivityReenter - originalCurrentPosition/currentPosition/startId/selectedId : " + originalCurrentPosition + "/" + currentPosition);
         if (currentPosition != originalCurrentPosition) {
-            mRecyclerView.scrollToPosition(currentPosition);
+            staggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -222,9 +223,9 @@ public class ArticleListActivity extends AppCompatActivity implements
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
         int columnCount = getResources().getInteger(R.integer.list_column_count);
-        StaggeredGridLayoutManager sglm =
+        staggeredGridLayoutManager =
                 new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(sglm);
+        mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
     }
 
     @Override
@@ -254,7 +255,6 @@ public class ArticleListActivity extends AppCompatActivity implements
                 @Override
                 public void onClick(View view) {
                     if (mIsRefreshing) {
-                        // FIXME: 26/05/2016 - the SnackBar below should disappear after few seconds
                         showSnackBar(R.string.db_update_in_progress, false);
                         return;
                     }
