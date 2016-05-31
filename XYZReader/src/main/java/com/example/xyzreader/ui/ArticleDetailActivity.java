@@ -63,7 +63,6 @@ public class ArticleDetailActivity extends AppCompatActivity
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            mProgressBarHandler = new ProgressBarHandler(this);
 //            mProgressBarHandler.show();
 //            Log.v(TAG, "onCreate - progressbar show called");
             postponeEnterTransition();
@@ -106,6 +105,7 @@ public class ArticleDetailActivity extends AppCompatActivity
             };
             setEnterSharedElementCallback(mCallback);
         }
+        mProgressBarHandler = new ProgressBarHandler(this);
         setContentView(R.layout.activity_article_detail);
 
         getLoaderManager().initLoader(0, null, this);
@@ -142,8 +142,13 @@ public class ArticleDetailActivity extends AppCompatActivity
         mUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                onSupportNavigateUp();
-                finishAfterTransition();
+                mProgressBarHandler.show();
+                Log.v(TAG, "finishAfterTransition - progressbar show called");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    finishAfterTransition();
+                } else {
+                    onSupportNavigateUp();
+                }
             }
         });
 
@@ -279,9 +284,20 @@ public class ArticleDetailActivity extends AppCompatActivity
         data.putExtra(EXTRA_THIS_CURRENT_POSITION, mCurrentDetailsFragment.getThisFragmentPosition());
         setResult(RESULT_OK, data);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            try {
+//                Thread.sleep(3000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             super.finishAfterTransition();
         } else {
             super.finish();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.v(TAG, "onBackPressed - start");
+        super.onBackPressed();
     }
 }

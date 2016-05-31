@@ -157,6 +157,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        Log.v(TAG, "onResume - start");
         mIsDetailsActivityStarted = false;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             mProgressBarHandler.hide();
@@ -173,6 +174,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     public void onActivityReenter(int requestCode, Intent data) {
         super.onActivityReenter(requestCode, data);
+        Log.v(TAG, "onActivityReenter - start");
         mTmpReenterState = new Bundle(data.getExtras());
         int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
@@ -182,8 +184,8 @@ public class ArticleListActivity extends AppCompatActivity implements
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mProgressBarHandler.show();
-            Log.v(TAG, "onActivityReenter - progressbar show called");
+//            mProgressBarHandler.show();
+//            Log.v(TAG, "onActivityReenter - progressbar show called");
             postponeEnterTransition();
         }
         mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
