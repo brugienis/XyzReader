@@ -30,6 +30,7 @@ import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
 import com.example.xyzreader.data.UpdaterService;
+import com.example.xyzreader.utils.ProgressBarHandler;
 
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     private Bundle mTmpReenterState;
     private boolean mIsRefreshing = false;
     private StaggeredGridLayoutManager staggeredGridLayoutManager;
+    private ProgressBarHandler mProgressBarHandler;
 
     public static final String LIST_SELECTED_ARTICLE_POSITION = "com.example.xyzreader.ui.LIST_SELECTED_ARTICLE_POSITION";
 
@@ -132,6 +134,8 @@ public class ArticleListActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             refresh();
         }
+
+        mProgressBarHandler = new ProgressBarHandler(this);
     }
 
     /**
@@ -154,6 +158,10 @@ public class ArticleListActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         mIsDetailsActivityStarted = false;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            mProgressBarHandler.hide();
+            Log.v(TAG, "onResume - progressbar hide called");
+        }
     }
 
     @Override
@@ -174,6 +182,8 @@ public class ArticleListActivity extends AppCompatActivity implements
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mProgressBarHandler.show();
+            Log.v(TAG, "onActivityReenter - progressbar show called");
             postponeEnterTransition();
         }
         mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -186,6 +196,8 @@ public class ArticleListActivity extends AppCompatActivity implements
                     Log.v(TAG, "onPreDraw - calling startPostponedEnterTransition");
                     startPostponedEnterTransition();
                 }
+                mProgressBarHandler.hide();
+                Log.v(TAG, "onActivityReenter - progressbar hide called");
                 return true;
             }
         });
@@ -273,6 +285,8 @@ public class ArticleListActivity extends AppCompatActivity implements
                         Intent intent = new Intent(Intent.ACTION_VIEW,
                                 ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition())));
                         intent.putExtra(LIST_SELECTED_ARTICLE_POSITION, vh.getAdapterPosition());
+                        mProgressBarHandler.show();
+                        Log.v(TAG, "onCreateViewHolder - progressbar show called");
                         ActivityCompat.startActivity(ArticleListActivity.this, intent, bundle);
                     }
                 }

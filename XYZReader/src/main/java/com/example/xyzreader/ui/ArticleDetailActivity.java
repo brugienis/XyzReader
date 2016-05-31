@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
+import com.example.xyzreader.utils.ProgressBarHandler;
 
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ public class ArticleDetailActivity extends AppCompatActivity
     static final String EXTRA_THIS_CURRENT_POSITION = "extra_this_current_position";
     static final String EXTRA_ORIGINAL_CURRENT_POSITION = "extra_original_current_position";
     private ArticleDetailFragment mCurrentDetailsFragment;
+    private ProgressBarHandler mProgressBarHandler;
 
     private static final String TAG = ArticleDetailActivity.class.getSimpleName();
 
@@ -61,6 +63,9 @@ public class ArticleDetailActivity extends AppCompatActivity
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            mProgressBarHandler = new ProgressBarHandler(this);
+//            mProgressBarHandler.show();
+//            Log.v(TAG, "onCreate - progressbar show called");
             postponeEnterTransition();
             final SharedElementCallback mCallback = new SharedElementCallback() {
                 @Override
@@ -169,6 +174,11 @@ public class ArticleDetailActivity extends AppCompatActivity
         Log.v(TAG, "onCreate - mListSelectedArticlePosition/mStartId/mSelectedItemId: " + mListSelectedArticlePosition + "/" + mStartId + "/" + mSelectedItemId);
     }
 
+    public void hideProgressBar() {
+        mProgressBarHandler.hide();
+        Log.v(TAG, "hideProgressBar - progressbar hide called");
+    }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -268,6 +278,10 @@ public class ArticleDetailActivity extends AppCompatActivity
         data.putExtra(EXTRA_ORIGINAL_CURRENT_POSITION, mListSelectedArticlePosition);
         data.putExtra(EXTRA_THIS_CURRENT_POSITION, mCurrentDetailsFragment.getThisFragmentPosition());
         setResult(RESULT_OK, data);
-        super.finishAfterTransition();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            super.finishAfterTransition();
+        } else {
+            super.finish();
+        }
     }
 }

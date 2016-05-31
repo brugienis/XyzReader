@@ -272,6 +272,8 @@ public class ArticleDetailFragment extends Fragment implements
                 @Override
                 public boolean onPreDraw() {
                     mPhotoView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    // FIXME: 31/05/2016 use callback 
+                    getActivityCast().hideProgressBar();
                     getActivity().startPostponedEnterTransition();
                     return true;
                 }
