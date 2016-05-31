@@ -179,10 +179,10 @@ public class ArticleDetailActivity extends AppCompatActivity
         Log.v(TAG, "onCreate - mListSelectedArticlePosition/mStartId/mSelectedItemId: " + mListSelectedArticlePosition + "/" + mStartId + "/" + mSelectedItemId);
     }
 
-    public void hideProgressBar() {
-        mProgressBarHandler.hide();
-        Log.v(TAG, "hideProgressBar - progressbar hide called");
-    }
+//    public void hideProgressBar() {
+//        mProgressBarHandler.hide();
+//        Log.v(TAG, "hideProgressBar - progressbar hide called");
+//    }
 
 
     @Override

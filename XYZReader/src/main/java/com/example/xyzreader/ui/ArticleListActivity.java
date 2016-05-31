@@ -48,6 +48,7 @@ import java.util.Map;
 public class ArticleListActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String STAGGERED_GRIDLAYOUT_MANAGER = "staggered_gridlayout_manager";
     private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
@@ -56,7 +57,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     public static String[] TRANSITION_NAMES;
     private Bundle mTmpReenterState;
     private boolean mIsRefreshing = false;
-    private StaggeredGridLayoutManager staggeredGridLayoutManager;
+    private StaggeredGridLayoutManager mStaggeredGridLayoutManager;
     private ProgressBarHandler mProgressBarHandler;
 
     public static final String LIST_SELECTED_ARTICLE_POSITION = "com.example.xyzreader.ui.LIST_SELECTED_ARTICLE_POSITION";
@@ -66,6 +67,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(TAG, "onCreate - start");
 //        setContentView(R.layout.activity_article_list);
         setContentView(R.layout.activity_article_list_with_coordinatorlayout);
 
@@ -138,6 +140,28 @@ public class ArticleListActivity extends AppCompatActivity implements
         mProgressBarHandler = new ProgressBarHandler(this);
     }
 
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.v(TAG, "onSaveInstanceState - start");
+
+        if (mStaggeredGridLayoutManager != null) {
+            outState.putParcelable(ArticleListActivity.STAGGERED_GRIDLAYOUT_MANAGER, mStaggeredGridLayoutManager.onSaveInstanceState());
+        }
+    }
+
+    /**
+     * Retrieves saved data.
+     */
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.v(TAG, "onRestoreInstanceState - start");
+
+        mStaggeredGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable("STAGGERED_GRIDLAYOUT_MANAGER"));
+    }
+
     /**
      * Start new search.
      */
@@ -180,7 +204,12 @@ public class ArticleListActivity extends AppCompatActivity implements
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
         Log.v(TAG, "onActivityReenter - originalCurrentPosition/currentPosition/startId/selectedId : " + originalCurrentPosition + "/" + currentPosition);
         if (currentPosition != originalCurrentPosition) {
-            staggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
+//            if (mStaggeredGridLayoutManager == null) {
+//                Log.v(TAG, "onActivityReenter - before mRecyclerView/mStaggeredGridLayoutManager : " + mRecyclerView + "/" + mStaggeredGridLayoutManager);
+//                mStaggeredGridLayoutManager = (StaggeredGridLayoutManager) mRecyclerView.getLayoutManager();
+//                Log.v(TAG, "onActivityReenter - after  mRecyclerView/mStaggeredGridLayoutManager : " + mRecyclerView + "/" + mStaggeredGridLayoutManager);
+//            }
+            mStaggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -237,9 +266,9 @@ public class ArticleListActivity extends AppCompatActivity implements
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
         int columnCount = getResources().getInteger(R.integer.list_column_count);
-        staggeredGridLayoutManager =
+        mStaggeredGridLayoutManager =
                 new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+        mRecyclerView.setLayoutManager(mStaggeredGridLayoutManager);
     }
 
     @Override
