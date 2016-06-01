@@ -330,6 +330,7 @@ public class ArticleListActivity extends AppCompatActivity implements
             mCursor.moveToPosition(position);
             holder.thisViewHolderPosition = position;
             String articleTitle = mCursor.getString(ArticleLoader.Query.TITLE);
+            // FIXME: 1/06/2016 - remove position from the line below
             holder.titleView.setText(position + "-" + articleTitle);
             holder.subtitleView.setText(
                     DateUtils.getRelativeTimeSpanString(
