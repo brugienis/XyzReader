@@ -206,7 +206,11 @@ public class ArticleListActivity extends AppCompatActivity implements
 //                mStaggeredGridLayoutManager = (StaggeredGridLayoutManager) mRecyclerView.getLayoutManager();
 //                Log.v(TAG, "onActivityReenter - after  mRecyclerView/mStaggeredGridLayoutManager : " + mRecyclerView + "/" + mStaggeredGridLayoutManager);
 //            }
-            mStaggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
+            if (mStaggeredGridLayoutManager == null) {
+                mRecyclerView.scrollToPosition(currentPosition);
+            } else {
+                mStaggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
+            }
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
