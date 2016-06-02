@@ -128,12 +128,12 @@ public class ArticleDetailActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 mProgressBarHandler.show();
-                Log.v(TAG, "finishAfterTransition - progressbar show called");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    finishAfterTransition();
-                } else {
+                Log.v(TAG, "setOnClickListener - called");
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                    finishAfterTransition();
+//                } else {
                     onSupportNavigateUp();
-                }
+//                }
             }
         });
 
@@ -263,6 +263,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 
     @Override
     public void finishAfterTransition() {
+        Log.v(TAG, "finishAfterTransition - called");
         mIsReturning = true;
         Intent data = new Intent();
         data.putExtra(EXTRA_ORIGINAL_CURRENT_POSITION, mListSelectedArticlePosition);
