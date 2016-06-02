@@ -10,5 +10,10 @@
     <dimen name="border_width">0dp</dimen>
 
     <dimen name="appbar_height">200dp</dimen>
+    <dimen name="appbar_elevation">4dp</dimen>
+    <dimen name="photo_container_height">112dp</dimen>
+    <dimen name="expanded_title_margin_start">48dp</dimen>
+    <dimen name="expanded_title_margin_end">64dp</dimen>
+    <dimen name="recycler_view_padding_top_and_bottom">5dp</dimen>
 
 </resources>
