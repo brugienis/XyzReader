@@ -63,8 +63,6 @@ public class ArticleDetailActivity extends AppCompatActivity
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-//            mProgressBarHandler.show();
-//            Log.v(TAG, "onCreate - progressbar show called");
             postponeEnterTransition();
             final SharedElementCallback mCallback = new SharedElementCallback() {
                 @Override
@@ -88,19 +86,6 @@ public class ArticleDetailActivity extends AppCompatActivity
                             sharedElements.put(sharedElement.getTransitionName(), sharedElement);
                         }
                     }
-                }
-
-                @Override
-                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-                    Log.v(TAG,"onSharedElementStart - start");
-                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
-                }
-
-                @Override
-                public void onSharedElementEnd(List<String> sharedElementNames,
-                                               List<View> sharedElements, List<View> sharedElementSnapshots) {
-                    Log.v(TAG,"onSharedElementEnd - start");
-                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
                 }
             };
             setEnterSharedElementCallback(mCallback);

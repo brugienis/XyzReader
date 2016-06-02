@@ -122,7 +122,7 @@ public class ArticleDetailFragment extends Fragment implements
             Bundle savedInstanceState) {
 //        Log.v(TAG, "onCreateView started");
 
-        mRootView = inflater.inflate(R.layout.fragment_article_detail_with_coordinatedlayout, container, false);
+        mRootView = inflater.inflate(R.layout.fragment_article_detail, container, false);
 
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout)
                 mRootView.findViewById(R.id.draw_insets_frame_layout);
