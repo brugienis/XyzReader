@@ -16,6 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -67,7 +68,6 @@ public class ArticleDetailActivity extends AppCompatActivity
             final SharedElementCallback mCallback = new SharedElementCallback() {
                 @Override
                 public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-                    Log.v(TAG, "onMapSharedElements - mIsReturning: " + mIsReturning);
                     if (mIsReturning) {
                         ImageView sharedElement = mCurrentDetailsFragment.getAlbumImage();
                         if (sharedElement == null) {
@@ -128,12 +128,7 @@ public class ArticleDetailActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 mProgressBarHandler.show();
-                Log.v(TAG, "setOnClickListener - called");
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    finishAfterTransition();
-//                } else {
-                    onSupportNavigateUp();
-//                }
+                onBackPressed();
             }
         });
 
@@ -161,21 +156,13 @@ public class ArticleDetailActivity extends AppCompatActivity
                 mListSelectedArticlePosition = intent.getIntExtra(ArticleListActivity.LIST_SELECTED_ARTICLE_POSITION, -1);
             }
         }
-        Log.v(TAG, "onCreate - mListSelectedArticlePosition/mStartId/mSelectedItemId: " + mListSelectedArticlePosition + "/" + mStartId + "/" + mSelectedItemId);
     }
-
-//    public void hideProgressBar() {
-//        mProgressBarHandler.hide();
-//        Log.v(TAG, "hideProgressBar - progressbar hide called");
-//    }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putInt(ArticleListActivity.LIST_SELECTED_ARTICLE_POSITION, mListSelectedArticlePosition);
-        // FIXME: 30/05/2016 should save also mStartId?
     }
 
     /**
@@ -197,7 +184,6 @@ public class ArticleDetailActivity extends AppCompatActivity
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         mCursor = cursor;
         mPagerAdapter.notifyDataSetChanged();
-        Log.v(TAG,"onLoadFinished - cursor count: " + cursor.getCount());
 
         // Select the start ID
         if (mStartId > 0) {
@@ -262,28 +248,16 @@ public class ArticleDetailActivity extends AppCompatActivity
     }
 
     @Override
-    public void finishAfterTransition() {
-        Log.v(TAG, "finishAfterTransition - called");
+    public void supportFinishAfterTransition() {
         mIsReturning = true;
         Intent data = new Intent();
         data.putExtra(EXTRA_ORIGINAL_CURRENT_POSITION, mListSelectedArticlePosition);
         data.putExtra(EXTRA_THIS_CURRENT_POSITION, mCurrentDetailsFragment.getThisFragmentPosition());
         setResult(RESULT_OK, data);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            try {
-//                Thread.sleep(3000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
             super.finishAfterTransition();
         } else {
             super.finish();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        Log.v(TAG, "onBackPressed - start");
-        super.onBackPressed();
     }
 }

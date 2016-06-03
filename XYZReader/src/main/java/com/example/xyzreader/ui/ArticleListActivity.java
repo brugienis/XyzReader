@@ -151,6 +151,8 @@ public class ArticleListActivity extends AppCompatActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
+        // FIXME: 3/06/2016 still getting java.lang.NullPointerException: Attempt to invoke virtual method 'void android.support.v7.widget.StaggeredGridLayoutManager.onRestoreInstanceState(android.os.Parcelable)' on a null object reference
+        // when in landscape, changing selected article, clicking back button and immediately rotating device to portrait
         mStaggeredGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable("STAGGERED_GRIDLAYOUT_MANAGER"));
     }
 
@@ -193,7 +195,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
         if (currentPosition != originalCurrentPosition) {
             if (mStaggeredGridLayoutManager == null) {
-                mRecyclerView.scrollToPosition(currentPosition);
+                mRecyclerView.smoothScrollToPosition(currentPosition);
             } else {
                 mStaggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
             }

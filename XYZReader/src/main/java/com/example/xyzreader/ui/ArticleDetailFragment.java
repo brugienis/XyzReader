@@ -239,10 +239,6 @@ public class ArticleDetailFragment extends Fragment implements
                                     }
                                 }
 
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                                    Log.v(TAG, "bindViews - transitionName: " + mPhotoView.getTransitionName());
-//                                    Log.v(TAG, "bindViews - transitionName: " + titleView.getTransitionName());
-                                }
                                 mRootView.findViewById(R.id.meta_bar)
                                         .setBackgroundColor(mMutedColor);
                                 updateStatusBar();
@@ -265,15 +261,11 @@ public class ArticleDetailFragment extends Fragment implements
     }
 
     private void startPostponedEnterTransition() {
-        // FIXME: 24/05/2016 - make sure to add the listener below if positions are equal
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && mItemId == mStartItemId) {
-            Log.v(TAG, "startPostponedEnterTransition - setting addOnPreDrawListener = mItemId/mStartItemId: " + mItemId + "/" + mStartItemId);
             mPhotoView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
                     mPhotoView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    // FIXME: 31/05/2016 use callback 
-//                    getActivityCast().hideProgressBar();
                     getActivity().startPostponedEnterTransition();
                     return true;
                 }
@@ -297,7 +289,6 @@ public class ArticleDetailFragment extends Fragment implements
 
         mCursor = cursor;
         if (mCursor != null && !mCursor.moveToFirst()) {
-            // FIXME: 29/05/2016 - show Snackbar
             Log.e(TAG, "Error reading item detail cursor");
             mCursor.close();
             mCursor = null;
