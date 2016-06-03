@@ -67,7 +67,6 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "onCreate - start");
         setContentView(R.layout.activity_article_list);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -83,8 +82,6 @@ public class ArticleListActivity extends AppCompatActivity implements
                             // so that the correct one falls into place.
                             String newTransitionName = TRANSITION_NAMES[currentPosition];
                             View newSharedElement = mRecyclerView.findViewWithTag(newTransitionName);
-                            Log.v(TAG,"onMapSharedElements - originalCurrentPosition/currentPosition: " + originalCurrentPosition + "/" + currentPosition);
-                            Log.v(TAG,"onMapSharedElements - newTransitionName/newSharedElement: " + newTransitionName + "/" + newSharedElement);
                             if (newSharedElement != null) {
                                 names.clear();
                                 names.add(newTransitionName);
@@ -141,7 +138,6 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.v(TAG, "onSaveInstanceState - start");
 
         if (mStaggeredGridLayoutManager != null) {
             outState.putParcelable(ArticleListActivity.STAGGERED_GRIDLAYOUT_MANAGER, mStaggeredGridLayoutManager.onSaveInstanceState());
@@ -154,7 +150,6 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        Log.v(TAG, "onRestoreInstanceState - start");
 
         mStaggeredGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable("STAGGERED_GRIDLAYOUT_MANAGER"));
     }
@@ -178,11 +173,9 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(TAG, "onResume - start");
         mIsDetailsActivityStarted = false;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             mProgressBarHandler.hide();
-            Log.v(TAG, "onResume - progressbar hide called");
         }
     }
 
@@ -195,17 +188,10 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     public void onActivityReenter(int requestCode, Intent data) {
         super.onActivityReenter(requestCode, data);
-        Log.v(TAG, "onActivityReenter - start");
         mTmpReenterState = new Bundle(data.getExtras());
         int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
-        Log.v(TAG, "onActivityReenter - originalCurrentPosition/currentPosition/startId/selectedId : " + originalCurrentPosition + "/" + currentPosition);
         if (currentPosition != originalCurrentPosition) {
-//            if (mStaggeredGridLayoutManager == null) {
-//                Log.v(TAG, "onActivityReenter - before mRecyclerView/mStaggeredGridLayoutManager : " + mRecyclerView + "/" + mStaggeredGridLayoutManager);
-//                mStaggeredGridLayoutManager = (StaggeredGridLayoutManager) mRecyclerView.getLayoutManager();
-//                Log.v(TAG, "onActivityReenter - after  mRecyclerView/mStaggeredGridLayoutManager : " + mRecyclerView + "/" + mStaggeredGridLayoutManager);
-//            }
             if (mStaggeredGridLayoutManager == null) {
                 mRecyclerView.scrollToPosition(currentPosition);
             } else {
@@ -214,8 +200,6 @@ public class ArticleListActivity extends AppCompatActivity implements
 
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            mProgressBarHandler.show();
-//            Log.v(TAG, "onActivityReenter - progressbar show called");
             postponeEnterTransition();
         }
         mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -225,11 +209,9 @@ public class ArticleListActivity extends AppCompatActivity implements
                 // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
                 mRecyclerView.requestLayout();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    Log.v(TAG, "onPreDraw - calling startPostponedEnterTransition");
                     startPostponedEnterTransition();
                 }
                 mProgressBarHandler.hide();
-                Log.v(TAG, "onActivityReenter - progressbar hide called");
                 return true;
             }
         });
@@ -306,7 +288,6 @@ public class ArticleListActivity extends AppCompatActivity implements
                     if (!mIsDetailsActivityStarted) {
                         mIsDetailsActivityStarted = true;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            Log.v(TAG, "onCreateViewHolder - starting activity with ActivityOptions.makeSceneTransitionAnimation");
                             ActivityOptionsCompat options =
                                     ActivityOptionsCompat.makeSceneTransitionAnimation(
                                             ArticleListActivity.this,
@@ -318,7 +299,6 @@ public class ArticleListActivity extends AppCompatActivity implements
                                 ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition())));
                         intent.putExtra(LIST_SELECTED_ARTICLE_POSITION, vh.getAdapterPosition());
                         mProgressBarHandler.show();
-                        Log.v(TAG, "onCreateViewHolder - progressbar show called");
                         ActivityCompat.startActivity(ArticleListActivity.this, intent, bundle);
                     }
                 }
@@ -331,8 +311,7 @@ public class ArticleListActivity extends AppCompatActivity implements
             mCursor.moveToPosition(position);
             holder.thisViewHolderPosition = position;
             String articleTitle = mCursor.getString(ArticleLoader.Query.TITLE);
-            // FIXME: 1/06/2016 - remove position from the line below
-            holder.titleView.setText(position + "-" + articleTitle);
+            holder.titleView.setText(articleTitle);
             holder.subtitleView.setText(
                     DateUtils.getRelativeTimeSpanString(
                             mCursor.getLong(ArticleLoader.Query.PUBLISHED_DATE),
