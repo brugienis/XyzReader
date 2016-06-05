@@ -7,10 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -67,6 +69,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(TAG, "onCreate - start");
         setContentView(R.layout.activity_article_list);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -140,8 +143,12 @@ public class ArticleListActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
 
         if (mStaggeredGridLayoutManager != null) {
-            outState.putParcelable(ArticleListActivity.STAGGERED_GRIDLAYOUT_MANAGER, mStaggeredGridLayoutManager.onSaveInstanceState());
+            Log.v(TAG, "onSaveInstanceState - state: " + mStaggeredGridLayoutManager.onSaveInstanceState());
+            outState.putParcelable(STAGGERED_GRIDLAYOUT_MANAGER, mStaggeredGridLayoutManager.onSaveInstanceState());
+        } else {
+            Log.v(TAG, "onSaveInstanceState - mStaggeredGridLayoutManager is null");
         }
+//        Log.v(TAG, "onSaveInstanceState - outState: " + outState);
     }
 
     /**
@@ -150,10 +157,19 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+//        Log.v(TAG, "onRestoreInstanceState - savedInstanceState: " + savedInstanceState);
 
         // FIXME: 3/06/2016 still getting java.lang.NullPointerException: Attempt to invoke virtual method 'void android.support.v7.widget.StaggeredGridLayoutManager.onRestoreInstanceState(android.os.Parcelable)' on a null object reference
         // when in landscape, changing selected article, clicking back button and immediately rotating device to portrait
-        mStaggeredGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable("STAGGERED_GRIDLAYOUT_MANAGER"));
+
+        // MORE TESTING WITH rotation
+
+        Parcelable state = savedInstanceState.getParcelable(STAGGERED_GRIDLAYOUT_MANAGER);
+        Log.v(TAG, "onRestoreInstanceState - state: " + state);
+        if (state != null & mStaggeredGridLayoutManager != null) {
+//            mStaggeredGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STAGGERED_GRIDLAYOUT_MANAGER));
+            mStaggeredGridLayoutManager.onRestoreInstanceState(state);
+        }
     }
 
     /**
@@ -193,10 +209,13 @@ public class ArticleListActivity extends AppCompatActivity implements
         mTmpReenterState = new Bundle(data.getExtras());
         int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
+        Log.v(TAG, "onActivityReenter - currentPosition/originalCurrentPosition: " + currentPosition + "/" + originalCurrentPosition);
         if (currentPosition != originalCurrentPosition) {
             if (mStaggeredGridLayoutManager == null) {
-                mRecyclerView.smoothScrollToPosition(currentPosition);
+                Log.v(TAG, "onActivityReenter -  mRecyclerView.scrollToPosition currentPosition: " + currentPosition);
+                mRecyclerView.scrollToPosition(currentPosition);
             } else {
+                Log.v(TAG, "onActivityReenter -  mStaggeredGridLayoutManager.scrollToPositionWithOffset currentPosition: " + currentPosition);
                 mStaggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
             }
 
