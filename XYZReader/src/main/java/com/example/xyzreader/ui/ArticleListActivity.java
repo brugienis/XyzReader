@@ -7,12 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -135,6 +135,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         }
 
         mProgressBarHandler = new ProgressBarHandler(this);
+        Log.v(TAG, "onCreate - end");
     }
 
 
@@ -169,6 +170,8 @@ public class ArticleListActivity extends AppCompatActivity implements
         if (state != null & mStaggeredGridLayoutManager != null) {
 //            mStaggeredGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STAGGERED_GRIDLAYOUT_MANAGER));
             mStaggeredGridLayoutManager.onRestoreInstanceState(state);
+//            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.main_appbar);
+//            appBarLayout.setExpanded(false);
         }
     }
 
@@ -203,6 +206,23 @@ public class ArticleListActivity extends AppCompatActivity implements
         unregisterReceiver(mRefreshingReceiver);
     }
 
+    // FIXME: 5/06/2016 - the bolow seemed to fix the problem, but then I romoved to call
+    // to requestLayout() and it is still working
+    /**
+     *
+     * Called when shared elements transition returns back.
+     *
+     * Had to add mRecyclerView.requestLayout() after the call to
+     * mRecyclerView.getViewTreeObserver().addOnPreDrawListener(...) when the activity was created
+     * - onCreate() was called before onActivityReenter(...) was called. Without tha code the
+     * transition would never end, showing the article image at the top of the screen and part
+     * of the article list at the bttom of the screen.
+     * Based on (karl's answer)
+     *     http://stackoverflow.com/questions/32340565/activitytransition-onactivityreenter-onpredraw-never-called
+     *
+     * @param requestCode
+     * @param data
+     */
     @Override
     public void onActivityReenter(int requestCode, Intent data) {
         super.onActivityReenter(requestCode, data);
@@ -210,6 +230,9 @@ public class ArticleListActivity extends AppCompatActivity implements
         int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
         Log.v(TAG, "onActivityReenter - currentPosition/originalCurrentPosition: " + currentPosition + "/" + originalCurrentPosition);
+        // make sure AppBar is not extended
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.main_appbar);
+        appBarLayout.setExpanded(false);
         if (currentPosition != originalCurrentPosition) {
             if (mStaggeredGridLayoutManager == null) {
                 Log.v(TAG, "onActivityReenter -  mRecyclerView.scrollToPosition currentPosition: " + currentPosition);
@@ -220,22 +243,40 @@ public class ArticleListActivity extends AppCompatActivity implements
             }
 
         }
+        Log.v(TAG, "onActivityReenter -  before postponeEnterTransition");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             postponeEnterTransition();
         }
+        Log.v(TAG, "onActivityReenter -  after  postponeEnterTransition");
         mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
+                Log.v(TAG, "onActivityReenter.onPreDraw - start");
                 mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
+                Log.v(TAG, "onActivityReenter.onPreDraw - before requestLayout");
                 mRecyclerView.requestLayout();
+                Log.v(TAG, "onActivityReenter.onPreDraw - after  requestLayout");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     startPostponedEnterTransition();
                 }
+                Log.v(TAG, "onActivityReenter.onPreDraw - after  startPostponedEnterTransition");
                 mProgressBarHandler.hide();
                 return true;
             }
         });
+        // For some reason the problem disappeared. If it happen again, add boolean flag, that is
+        // // set in OnCreate(...) and set in onLoadFinished(...) and use in the if statement below
+
+        // TRY AGAIN TOMORROW after the computer is restarted
+        
+        // if mStaggeredGridLayoutManager is null, it means that the OnCreate was called and
+        // onLoadFinished(...) wasn't
+//        if (mStaggeredGridLayoutManager == null) {
+//            Log.v(TAG, "onActivityReenter - calling requestLayout");
+//            mRecyclerView.requestLayout();
+//        }
+        Log.v(TAG, "onActivityReenter -  end");
     }
 
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
