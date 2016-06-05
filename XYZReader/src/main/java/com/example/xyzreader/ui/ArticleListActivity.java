@@ -269,7 +269,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         // // set in OnCreate(...) and set in onLoadFinished(...) and use in the if statement below
 
         // TRY AGAIN TOMORROW after the computer is restarted
-        
+
         // if mStaggeredGridLayoutManager is null, it means that the OnCreate was called and
         // onLoadFinished(...) wasn't
 //        if (mStaggeredGridLayoutManager == null) {
