@@ -70,7 +70,6 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "onCreate - start");
         setContentView(R.layout.activity_article_list);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -138,7 +137,6 @@ public class ArticleListActivity extends AppCompatActivity implements
         }
 
         mProgressBarHandler = new ProgressBarHandler(this);
-        Log.v(TAG, "onCreate - end");
     }
 
 
@@ -147,12 +145,8 @@ public class ArticleListActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
 
         if (mStaggeredGridLayoutManager != null) {
-            Log.v(TAG, "onSaveInstanceState - state: " + mStaggeredGridLayoutManager.onSaveInstanceState().hashCode());
             outState.putParcelable(STAGGERED_GRIDLAYOUT_MANAGER, mStaggeredGridLayoutManager.onSaveInstanceState());
-        } else {
-            Log.v(TAG, "onSaveInstanceState - mStaggeredGridLayoutManager is null");
         }
-//        Log.v(TAG, "onSaveInstanceState - outState: " + outState);
     }
 
     /**
@@ -161,20 +155,10 @@ public class ArticleListActivity extends AppCompatActivity implements
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-//        Log.v(TAG, "onRestoreInstanceState - savedInstanceState: " + savedInstanceState);
-
-        // FIXME: 3/06/2016 still getting java.lang.NullPointerException: Attempt to invoke virtual method 'void android.support.v7.widget.StaggeredGridLayoutManager.onRestoreInstanceState(android.os.Parcelable)' on a null object reference
-        // when in landscape, changing selected article, clicking back button and immediately rotating device to portrait
-
-        // MORE TESTING WITH rotation
 
         Parcelable state = savedInstanceState.getParcelable(STAGGERED_GRIDLAYOUT_MANAGER);
-        Log.v(TAG, "onRestoreInstanceState - state: " + state.hashCode());
         if (state != null & mStaggeredGridLayoutManager != null) {
-//            mStaggeredGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STAGGERED_GRIDLAYOUT_MANAGER));
             mStaggeredGridLayoutManager.onRestoreInstanceState(state);
-//            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.main_appbar);
-//            appBarLayout.setExpanded(false);
         }
     }
 
@@ -209,8 +193,6 @@ public class ArticleListActivity extends AppCompatActivity implements
         unregisterReceiver(mRefreshingReceiver);
     }
 
-    // FIXME: 5/06/2016 - the bolow seemed to fix the problem, but then I romoved to call
-    // to requestLayout() and it is still working
     /**
      *
      * Called when shared elements transition returns back.
@@ -219,7 +201,7 @@ public class ArticleListActivity extends AppCompatActivity implements
      * mRecyclerView.getViewTreeObserver().addOnPreDrawListener(...) when the activity was created
      * - onCreate() was called before onActivityReenter(...) was called. Without tha code the
      * transition would never end, showing the article image at the top of the screen and part
-     * of the article list at the bttom of the screen.
+     * of the article list at the bottom of the screen.
      * Based on (karl's answer)
      *     http://stackoverflow.com/questions/32340565/activitytransition-onactivityreenter-onpredraw-never-called
      *
@@ -232,47 +214,36 @@ public class ArticleListActivity extends AppCompatActivity implements
         mTmpReenterState = new Bundle(data.getExtras());
         int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
-        Log.v(TAG, "onActivityReenter - currentPosition/originalCurrentPosition/hash: " + currentPosition + "/" + originalCurrentPosition + "/" + (mStaggeredGridLayoutManager == null ? "null" : mStaggeredGridLayoutManager.hashCode()));
         // make sure AppBar is not extended
         AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.main_appbar);
         appBarLayout.setExpanded(false);
         if (currentPosition != originalCurrentPosition) {
             if (mStaggeredGridLayoutManager == null) {
-                Log.v(TAG, "onActivityReenter -  mRecyclerView.scrollToPosition currentPosition: " + currentPosition);
                 mRecyclerView.scrollToPosition(currentPosition);
             } else {
-                Log.v(TAG, "onActivityReenter -  mStaggeredGridLayoutManager.scrollToPositionWithOffset currentPosition/hash: " + currentPosition + "/" + mStaggeredGridLayoutManager.hashCode());
                 mStaggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
             }
 
         }
-        Log.v(TAG, "onActivityReenter -  before postponeEnterTransition");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             postponeEnterTransition();
         }
-        Log.v(TAG, "onActivityReenter -  after  postponeEnterTransition");
         mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-//                Log.v(TAG, "onActivityReenter.onPreDraw - start");
                 mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
-//                Log.v(TAG, "onActivityReenter.onPreDraw - before requestLayout");
                 mRecyclerView.requestLayout();
-//                Log.v(TAG, "onActivityReenter.onPreDraw - after  requestLayout");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     startPostponedEnterTransition();
                 }
-                Log.v(TAG, "onActivityReenter.onPreDraw - after  startPostponedEnterTransition");
                 mProgressBarHandler.hide();
                 return true;
             }
         });
         if (mIsConfigurationChanged) {
-            Log.v(TAG, "onActivityReenter - calling requestLayout");
             mRecyclerView.requestLayout();
         }
-        Log.v(TAG, "onActivityReenter -  end");
     }
 
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
@@ -309,7 +280,6 @@ public class ArticleListActivity extends AppCompatActivity implements
         int columnCount = getResources().getInteger(R.integer.list_column_count);
         mStaggeredGridLayoutManager =
                 new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
-        Log.v(TAG, "onLoadFinished - hash: " + mStaggeredGridLayoutManager.hashCode());
         mRecyclerView.setLayoutManager(mStaggeredGridLayoutManager);
     }
 
