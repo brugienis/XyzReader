@@ -99,7 +99,6 @@ public class ArticleDetailFragment extends Fragment implements
         mStatusBarFullOpacityBottom = getResources().getDimensionPixelSize(
                 R.dimen.detail_card_top_margin);
         setHasOptionsMenu(true);
-//        Log.v(TAG, "onCreate - itemId/startItemId: " + mItemId + "/" + mStartItemId);
     }
 
     public ArticleDetailActivity getActivityCast() {
@@ -120,7 +119,6 @@ public class ArticleDetailFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-//        Log.v(TAG, "onCreateView started");
 
         mRootView = inflater.inflate(R.layout.fragment_article_detail, container, false);
 
@@ -195,7 +193,6 @@ public class ArticleDetailFragment extends Fragment implements
 
     private void bindViews() {
         if (mRootView == null) {
-            Log.v(TAG, "bindViews - mRootView: " + mRootView);
             return;
         }
 
@@ -204,7 +201,6 @@ public class ArticleDetailFragment extends Fragment implements
         bylineView.setMovementMethod(new LinkMovementMethod());
         TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
         bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
-//        Log.v(TAG, "bindViews - mCursor: " + mCursor);
 
         if (mCursor != null) {
             mRootView.setAlpha(0);
@@ -226,7 +222,6 @@ public class ArticleDetailFragment extends Fragment implements
                         @Override
                         public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
                             Bitmap bitmap = imageContainer.getBitmap();
-//                            Log.v(TAG, "bindViews.onResponse - bitmap: " + bitmap);
                             if (bitmap != null) {
                                 Palette p = Palette.generate(bitmap, 12);
                                 mMutedColor = p.getDarkMutedColor(0xFF333333);
@@ -235,7 +230,6 @@ public class ArticleDetailFragment extends Fragment implements
                                     // when scrolling very fast, cursor can be null
                                     if (mCursor != null) {
                                         mPhotoView.setTransitionName(mCursor.getString(ArticleLoader.Query.TITLE));
-//                                        Log.v(TAG, "bindViews - transitionName: " + mCursor.getString(ArticleLoader.Query.TITLE));
                                     }
                                 }
 
