@@ -56,6 +56,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     private RecyclerView mRecyclerView;
     private View mCoordinatorlayout;
     private boolean mIsDetailsActivityStarted;
+    private boolean mIsConfigurationChanged;
     public static String[] TRANSITION_NAMES;
     private Bundle mTmpReenterState;
     private boolean mIsRefreshing = false;
@@ -132,6 +133,8 @@ public class ArticleListActivity extends AppCompatActivity implements
 
         if (savedInstanceState == null) {
             refresh();
+        } else {
+            mIsConfigurationChanged = true;
         }
 
         mProgressBarHandler = new ProgressBarHandler(this);
@@ -144,7 +147,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
 
         if (mStaggeredGridLayoutManager != null) {
-            Log.v(TAG, "onSaveInstanceState - state: " + mStaggeredGridLayoutManager.onSaveInstanceState());
+            Log.v(TAG, "onSaveInstanceState - state: " + mStaggeredGridLayoutManager.onSaveInstanceState().hashCode());
             outState.putParcelable(STAGGERED_GRIDLAYOUT_MANAGER, mStaggeredGridLayoutManager.onSaveInstanceState());
         } else {
             Log.v(TAG, "onSaveInstanceState - mStaggeredGridLayoutManager is null");
@@ -166,7 +169,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         // MORE TESTING WITH rotation
 
         Parcelable state = savedInstanceState.getParcelable(STAGGERED_GRIDLAYOUT_MANAGER);
-        Log.v(TAG, "onRestoreInstanceState - state: " + state);
+        Log.v(TAG, "onRestoreInstanceState - state: " + state.hashCode());
         if (state != null & mStaggeredGridLayoutManager != null) {
 //            mStaggeredGridLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(STAGGERED_GRIDLAYOUT_MANAGER));
             mStaggeredGridLayoutManager.onRestoreInstanceState(state);
@@ -229,7 +232,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         mTmpReenterState = new Bundle(data.getExtras());
         int originalCurrentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_ORIGINAL_CURRENT_POSITION);
         int currentPosition = mTmpReenterState.getInt(ArticleDetailActivity.EXTRA_THIS_CURRENT_POSITION);
-        Log.v(TAG, "onActivityReenter - currentPosition/originalCurrentPosition: " + currentPosition + "/" + originalCurrentPosition);
+        Log.v(TAG, "onActivityReenter - currentPosition/originalCurrentPosition/hash: " + currentPosition + "/" + originalCurrentPosition + "/" + (mStaggeredGridLayoutManager == null ? "null" : mStaggeredGridLayoutManager.hashCode()));
         // make sure AppBar is not extended
         AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.main_appbar);
         appBarLayout.setExpanded(false);
@@ -238,7 +241,7 @@ public class ArticleListActivity extends AppCompatActivity implements
                 Log.v(TAG, "onActivityReenter -  mRecyclerView.scrollToPosition currentPosition: " + currentPosition);
                 mRecyclerView.scrollToPosition(currentPosition);
             } else {
-                Log.v(TAG, "onActivityReenter -  mStaggeredGridLayoutManager.scrollToPositionWithOffset currentPosition: " + currentPosition);
+                Log.v(TAG, "onActivityReenter -  mStaggeredGridLayoutManager.scrollToPositionWithOffset currentPosition/hash: " + currentPosition + "/" + mStaggeredGridLayoutManager.hashCode());
                 mStaggeredGridLayoutManager.scrollToPositionWithOffset(currentPosition, 20);
             }
 
@@ -251,12 +254,12 @@ public class ArticleListActivity extends AppCompatActivity implements
         mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                Log.v(TAG, "onActivityReenter.onPreDraw - start");
+//                Log.v(TAG, "onActivityReenter.onPreDraw - start");
                 mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
-                Log.v(TAG, "onActivityReenter.onPreDraw - before requestLayout");
+//                Log.v(TAG, "onActivityReenter.onPreDraw - before requestLayout");
                 mRecyclerView.requestLayout();
-                Log.v(TAG, "onActivityReenter.onPreDraw - after  requestLayout");
+//                Log.v(TAG, "onActivityReenter.onPreDraw - after  requestLayout");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     startPostponedEnterTransition();
                 }
@@ -265,17 +268,10 @@ public class ArticleListActivity extends AppCompatActivity implements
                 return true;
             }
         });
-        // For some reason the problem disappeared. If it happen again, add boolean flag, that is
-        // // set in OnCreate(...) and set in onLoadFinished(...) and use in the if statement below
-
-        // TRY AGAIN TOMORROW after the computer is restarted
-
-        // if mStaggeredGridLayoutManager is null, it means that the OnCreate was called and
-        // onLoadFinished(...) wasn't
-//        if (mStaggeredGridLayoutManager == null) {
-//            Log.v(TAG, "onActivityReenter - calling requestLayout");
-//            mRecyclerView.requestLayout();
-//        }
+        if (mIsConfigurationChanged) {
+            Log.v(TAG, "onActivityReenter - calling requestLayout");
+            mRecyclerView.requestLayout();
+        }
         Log.v(TAG, "onActivityReenter -  end");
     }
 
@@ -313,6 +309,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         int columnCount = getResources().getInteger(R.integer.list_column_count);
         mStaggeredGridLayoutManager =
                 new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
+        Log.v(TAG, "onLoadFinished - hash: " + mStaggeredGridLayoutManager.hashCode());
         mRecyclerView.setLayoutManager(mStaggeredGridLayoutManager);
     }
 
