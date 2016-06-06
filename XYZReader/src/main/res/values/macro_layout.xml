@@ -16,4 +16,5 @@
     <dimen name="detail_body_bottom_margin">88dp</dimen>
     <dimen name="detail_elevation">2dp</dimen>
     <item name="detail_title_line_spacing_multiplier" format="float" type="fraction">0.9</item>
+    <dimen name="detail_photo_image_height">310dp</dimen>
 </resources>
